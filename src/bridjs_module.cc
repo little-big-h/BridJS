@@ -1,6 +1,3 @@
-#include <v8.h>
-#include <node.h>
-
 #include "dyncall_v8.h"
 #include "dyncallback_v8.h"
 #include "dynload_v8.h"

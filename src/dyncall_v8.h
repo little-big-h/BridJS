@@ -1,7 +1,7 @@
 #ifndef _DYNCALL_V8_H
 #define _DYNCALL_V8_H
 
-#include <v8.h>
+#include <node.h>
 
 namespace dyncall {
 

@@ -1,4 +1,4 @@
-#include <v8.h>
+#include <node.h>
 
 // return ThrowException(String::New("..."))
 

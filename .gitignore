@@ -1,6 +1,10 @@
 build
 dyncall
+dyncall_lib
 *~
 .gitignore
 .DS_Store
 non_committable_experiments
+/BridJS/nbproject/private/
+/Netbeans/nbproject/private/
+/Netbeans/

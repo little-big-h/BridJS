@@ -1,7 +1,7 @@
 #ifndef _DYNLOAD_V8_H
 #define _DYNLOAD_V8_H
+#include <node.h>
 
-#include <v8.h>
 
 namespace dynload {
 
