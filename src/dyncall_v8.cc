@@ -1,8 +1,9 @@
 #include "dyncall_v8.h"
 #include "dyncall_v8_utils.h"
-
-#include "dyncall.h"
-
+extern "C"
+{
+        #include "dyncall.h"
+}
 using namespace v8;
 using namespace bridjs;
 

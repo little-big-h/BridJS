@@ -1,6 +1,17 @@
+#ifdef _MSC_VER
+#include<node.h>
+#endif
+
 #include "dyncall_v8.h"
 #include "dyncallback_v8.h"
 #include "dynload_v8.h"
+
+#include <iostream>
+
+#ifndef _MSC_VER
+#include<node.h>
+#endif
+
 
 using namespace v8;
 
@@ -18,6 +29,9 @@ void init(Handle<Object> target) {
   EXPORT_FUNCTION(dynload, symsNameFromValue);
   
   EXPORT_FUNCTION(dyncall, newCallVM);
+
+  std::locale::global(std::locale(""));
+  std::wcout.imbue(std::locale(""));
 }
 
 NODE_MODULE(bridjs, init);

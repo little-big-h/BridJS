@@ -1,15 +1,66 @@
 #include "dynload_v8.h"
 #include "dyncall_v8_utils.h"
 
-#include "dynload.h"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <codecvt>
 
+
+
+extern "C"
+{
+    #include "dynload.h"
+#ifdef _MSC_VER
+	#include <Windows.h>
+#endif
+}
 using namespace v8;
 using namespace bridjs;
+/*
+std::string ConvertFromUtf16ToUtf8(const std::wstring& wstr)
+{
+    std::string convertedString;
+    int requiredSize = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, 0, 0, 0, 0);
+    if(requiredSize > 0)
+    {
+        std::vector<char> buffer(requiredSize);
+        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &buffer[0], requiredSize, 0, 0);
+        convertedString.assign(buffer.begin(), buffer.end() - 1);
+    }
+    return convertedString;
+}
+ 
+std::wstring ConvertFromUtf8ToUtf16(const std::string& str)
+{
+    std::wstring convertedString;
+    int requiredSize = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, 0, 0);
+    if(requiredSize > 0)
+    {
+        std::vector<wchar_t> buffer(requiredSize);
+        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &buffer[0], requiredSize);
+        convertedString.assign(buffer.begin(), buffer.end() - 1);
+    }
+ 
+    return convertedString;
+}*/
+
 
 Handle<Value> dynload::loadLibrary(const Arguments& args) {
   HandleScope scope;
-  GET_ASCII_STRING_ARG(libpath, args, 0);
-  DLLib *lib = dlLoadLibrary(libpath);
+  v8::String::Utf8Value libpath(args[0]);
+  DLLib *lib = NULL;
+  
+#ifndef _MSC_VER
+  lib = dlLoadLibrary((*libpath));
+#else
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cvt;
+  std::u16string libPathStr = cvt.from_bytes(*libpath);//ConvertFromUtf8ToUtf16(*libpath);
+
+  lib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
+#endif
+  std::wcout<<(*libpath)<<", lib: "<<lib<<std::endl;
+ 
   return scope.Close(ptr2string(lib));
 }
 
