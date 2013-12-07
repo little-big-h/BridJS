@@ -1,12 +1,9 @@
 lib/bridjs/win32_x64
-nb_build
+node_modules
 build
 dyncall
-dyncall_lib
 *~
 .gitignore
 .DS_Store
 non_committable_experiments
-/BridJS/nbproject/private/
-/Netbeans/nbproject/private/
-/Netbeans/
+netbeans

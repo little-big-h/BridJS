@@ -1,8 +1,10 @@
 #include "dyncall_v8_utils.h"
 
-using namespace v8;
+#include <iostream>
 
-void* bridjs::string2ptr(Local<Value> value) {
+using namespace v8;
+/*
+void* bridjs::Utils::string2ptr(Local<Value> value) {
   String::AsciiValue str(value);
   void* ptr;
   switch (sizeof(void*)) {
@@ -22,7 +24,7 @@ void* bridjs::string2ptr(Local<Value> value) {
   return ptr;
 }
 
-Handle<Value> bridjs::ptr2string(void* ptr) {
+Handle<Value> bridjs::Utils::ptr2string(void* ptr) {
   char str[20];
   switch (sizeof(void*)) {
   case 8:
@@ -35,4 +37,28 @@ Handle<Value> bridjs::ptr2string(void* ptr) {
     *str = 0;
   }
   return String::New(str);
+}
+*/
+Handle<Value> bridjs::Utils::wrapPointer(const void* ptr){
+	HandleScope scope;
+	void* pptr;
+
+	//memcpy(&pptr,&ptr, sizeof(void*));
+
+	node::Buffer *buf = node::Buffer::New((char*)(&ptr), sizeof(void*));
+
+	memcpy(&pptr,node::Buffer::Data(buf), sizeof(void*));
+
+//	std::cout<<(void*)ptr<<", "<<pptr<<std::endl;
+
+	return scope.Close(buf->handle_);
+}
+
+
+void* bridjs::Utils::unwrapPointer(v8::Local<v8::Object> buffer){
+	void* ptr;
+
+	memcpy(&ptr, node::Buffer::Data(buffer), sizeof(void*));
+
+	return ptr;
 }

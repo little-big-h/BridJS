@@ -4,9 +4,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <codecvt>
 
-
+#ifdef _MSC_VER
+	#include <codecvt>
+#endif
 
 extern "C"
 {
@@ -17,6 +18,17 @@ extern "C"
 }
 using namespace v8;
 using namespace bridjs;
+
+struct DLSyms_
+{
+  DLLib*                pLib;
+  const char*           pBase;
+  const DWORD*          pNames;
+  const DWORD*          pFuncs;
+  const unsigned short* pOrds;
+  size_t                count;
+};
+
 /*
 std::string ConvertFromUtf16ToUtf8(const std::wstring& wstr)
 {
@@ -46,7 +58,7 @@ std::wstring ConvertFromUtf8ToUtf16(const std::string& str)
 }*/
 
 
-Handle<Value> dynload::loadLibrary(const Arguments& args) {
+Handle<Value> Dynload::loadLibrary(const Arguments& args) {
   HandleScope scope;
   v8::String::Utf8Value libpath(args[0]);
   DLLib *lib = NULL;
@@ -59,48 +71,74 @@ Handle<Value> dynload::loadLibrary(const Arguments& args) {
 
   lib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
 #endif
-  std::wcout<<(*libpath)<<", lib: "<<lib<<std::endl;
+  //std::wcout<<(*libpath)<<", lib: "<<lib<<std::endl;
  
-  return scope.Close(ptr2string(lib));
+  return scope.Close(bridjs::Utils::wrapPointer(lib));
 }
 
-Handle<Value> dynload::freeLibrary(const Arguments& args) {
+Handle<Value> Dynload::freeLibrary(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLLib, lib, args, 0);
   dlFreeLibrary(lib);
   return scope.Close(Undefined());
 }
 
-Handle<Value> dynload::findSymbol(const Arguments& args) {
+Handle<Value> Dynload::findSymbol(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLLib, lib, args, 0);
   GET_ASCII_STRING_ARG(name, args, 1);
   void* symbol = dlFindSymbol(lib, name);
-  return scope.Close(ptr2string(symbol));
+  return scope.Close(bridjs::Utils::wrapPointer(symbol));
 }
 
-Handle<Value> dynload::symsInit(const Arguments& args) {
+Handle<Value> Dynload::symsInit(const Arguments& args) {
   HandleScope scope;
-  GET_ASCII_STRING_ARG(libPath, args, 0);
-  DLSyms *pSyms = dlSymsInit(libPath);
-  return scope.Close(ptr2string(pSyms));
+  v8::String::Utf8Value libpath(args[0]);
+  DLSyms *pSyms = NULL;
+
+#ifndef _MSC_VER
+	pSyms = dlSymsInit(*libpath);
+#else
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cvt;
+  std::u16string libPathStr = cvt.from_bytes(*libpath);//ConvertFromUtf8ToUtf16(*libpath);
+
+  DLLib* pLib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
+
+  //std::wcout<<(*libpath)<<", lib: "<<pLib<<std::endl;
+
+  pSyms = (DLSyms*)malloc(sizeof(DLSyms));
+  const char* base = (const char*) pLib;
+  IMAGE_DOS_HEADER*       pDOSHeader      = (IMAGE_DOS_HEADER*) base;  
+  IMAGE_NT_HEADERS*       pNTHeader       = (IMAGE_NT_HEADERS*) ( base + pDOSHeader->e_lfanew );  
+  IMAGE_DATA_DIRECTORY*   pExportsDataDir = &pNTHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+  IMAGE_EXPORT_DIRECTORY* pExports        = (IMAGE_EXPORT_DIRECTORY*) (base + pExportsDataDir->VirtualAddress);  
+
+  pSyms->pBase  = base;
+  pSyms->pNames = (DWORD*)(base + pExports->AddressOfNames);
+  pSyms->pFuncs = (DWORD*)(base + pExports->AddressOfFunctions);
+  pSyms->pOrds  = (unsigned short*)(base + pExports->AddressOfNameOrdinals);
+  pSyms->count  = (size_t)pExports->NumberOfNames;
+  pSyms->pLib   = pLib;
+#endif
+
+  return scope.Close(bridjs::Utils::wrapPointer(pSyms));
 }
 
-Handle<Value> dynload::symsCleanup(const Arguments& args) {
+Handle<Value> Dynload::symsCleanup(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLSyms, pSyms, args, 0);
   dlSymsCleanup(pSyms);
   return scope.Close(Undefined());
 }
 
-Handle<Value> dynload::symsCount(const Arguments& args) {
+Handle<Value> Dynload::symsCount(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLSyms, pSyms, args, 0);
   int count = dlSymsCount(pSyms);
   return scope.Close(Number::New(count));
 }
 
-Handle<Value> dynload::symsName(const Arguments& args) {
+Handle<Value> Dynload::symsName(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLSyms, pSyms, args, 0);
   GET_NUMBER_ARG(index, args, 1);
@@ -108,7 +146,7 @@ Handle<Value> dynload::symsName(const Arguments& args) {
   return scope.Close(name ? String::New(name) : String::Empty());
 }
 
-Handle<Value> dynload::symsNameFromValue(const Arguments& args) {
+Handle<Value> Dynload::symsNameFromValue(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLSyms, pSyms, args, 0);
   GET_POINTER_ARG(void, value, args, 1);
