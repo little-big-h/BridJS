@@ -1,20 +1,57 @@
 #pragma once
-#include <v8.h>
 #include <node_buffer.h>
 #include <sstream>
 
+#define GET_CALL_ARG(args) \
+	GET_POINTER_ARG(DCCallVM,pVm,args,0)\
+	GET_POINTER_ARG(char,pFunction,args,1);
 
-
-// return ThrowException(String::New("..."))
 #define GET_INT32_ARG(name, args, index) \
   Local<Value> name ## Value = args[index]; \
   if (!name ## Value->IsNumber()) { \
     return v8::ThrowException(v8::Exception::TypeError(String::New( \
-      "Invalid value for number argument " #name " at index " #index))); \
+      "Invalid value for int32 argument " #name " at index " #index))); \
   } \
   Local<Number> name ## Number = Local<Number>::Cast(name ## Value); \
   int32_t name = (*name ## Number)->Int32Value();
 
+#define GET_FLOAT_ARG(name, args, index) \
+  Local<Value> name ## Value = args[index]; \
+  if (!name ## Value->IsNumber()) { \
+    return v8::ThrowException(v8::Exception::TypeError(String::New( \
+      "Invalid value for float argument " #name " at index " #index))); \
+  } \
+  Local<Number> name ## Number = Local<Number>::Cast(name ## Value); \
+  float name = (float)(*name ## Number)->Value();
+
+#define GET_INT64_ARG(name, args, index) \
+ Local<Value> name ## Value = args[index]; \
+ int64_t name; \
+ if(name ## Value->IsString()){ \
+    Local<String> stringValue = Local<String>::Cast(name ## Value); \
+	v8::String::Utf8Value str(name ## Value); \
+	name = atol(*str); \
+  }else if (name ## Value->IsNumber()) { \
+	name = name ## Value->IntegerValue(); \
+  }else{ \
+	return v8::ThrowException(v8::Exception::TypeError(String::New( \
+      "Invalid value for int64_t argument " #name " at index " #index))); \
+  } 
+
+#define GET_DOUBLE_ARG(name, args, index) \
+ Local<Value> name ## Value = args[index]; \
+ double name; \
+ if(name ## Value->IsString()){ \
+    Local<String> stringValue = Local<String>::Cast(name ## Value); \
+	v8::String::Utf8Value str(name ## Value); \
+	name = atof(*str); \
+  }else if (name ## Value->IsNumber()) { \
+    Local<Number> name ## Number = Local<Number>::Cast(name ## Value); \
+	name = name ## Number->Value(); \
+  }else{ \
+	return v8::ThrowException(v8::Exception::TypeError(String::New( \
+      "Invalid value for double argument " #name " at index " #index))); \
+  } 
 
 #define GET_NUMBER_ARG(name, args, index) \
   Local<Value> name ## Value = args[index]; \
@@ -24,6 +61,39 @@
   } \
   Local<Number> name ## Number = Local<Number>::Cast(name ## Value); \
   double name = (*name ## Number)->Value();
+
+#define GET_BOOL_ARG(name, args, index) \
+  Local<Value> name ## Value = args[index]; \
+  bool name; \
+  if (name ## Value->IsBoolean()) { \
+	name = name ## Value->ToBoolean()->BooleanValue(); \
+  }else if(name ## Value->IsBooleanObject()){ \
+	name = Local<BooleanObject>::Cast(name ## Value)->BooleanValue(); \
+  }else if (name ## Value->IsNumber()) { \
+    name = Local<Number>::Cast(name ## Value)->BooleanValue(); \
+  }else{ \
+	return v8::ThrowException(v8::Exception::TypeError(String::New( \
+      "Invalid value for boolean argument " #name " at index " #index))); \
+  } 
+
+#define GET_CHAR_ARG(name, args, index) \
+  Local<Value> name ## Value = args[index]; \
+  char name; \
+  if(name ## Value->IsString()){ \
+    Local<String> stringValue = Local<String>::Cast(name ## Value); \
+	v8::String::Utf8Value str(name ## Value); \
+    if(str.length()!=1){ \
+		std::stringstream message; \
+		message<<"Illegal cahr value: "<<(*str); \
+		return v8::ThrowException(v8::Exception::Error(String::New(message.str().c_str()))); \
+	} \
+	name = (*str)[0]; \
+  }else if (name ## Value->IsNumber()) { \
+	name = Local<Number>::Cast(name ## Value)->Int32Value(); \
+  }else{ \
+	return v8::ThrowException(v8::Exception::TypeError(String::New( \
+      "Invalid value for char argument " #name " at index " #index))); \
+  } 
   
 #define GET_STRING_ARG(name, args, index) \
   Local<Value> name = args[index]; \
@@ -43,12 +113,11 @@
 
 #define GET_POINTER_ARG(type, name, args, index) \
   Local<Value> name ## Value = args[index]; \
-  if (!name ## Value->IsObject()) { \
+  if (!name ## Value->IsObject() && !name ## Value->IsNull()) { \
     return v8::ThrowException(v8::Exception::TypeError(String::New( \
       "Invalid value for number argument " #name " at index " #index))); \
   } \
-  Local<Object> name ## Number = Local<Object>::Cast(name ## Value); \
-  type* name = (type*)bridjs::Utils::unwrapPointer(name ## Number);
+  type* name = (type*)bridjs::Utils::unwrapPointer(name ## Value);
 
 #define THROW_EXCEPTION(message) ThrowException(Exception::Error(String::New(message)))
 
@@ -63,13 +132,8 @@ namespace bridjs {
 
 	class Utils{
 	public:
-		/*
-		static void* string2ptr(v8::Local<v8::Value> value);
-		static v8::Handle<v8::Value> ptr2string(void* ptr);
-		*/
-
 		static v8::Handle<v8::Value> wrapPointer(const void* ptr);
-		static void* unwrapPointer(v8::Local<v8::Object> buffer);
+		static void* unwrapPointer(v8::Local<v8::Value> buffer);
 	};
 
 

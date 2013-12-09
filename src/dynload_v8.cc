@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
+#include <map>
+#include <mutex>
+#include <list>
 
 #ifdef _MSC_VER
 	#include <codecvt>
@@ -29,57 +31,86 @@ struct DLSyms_
   size_t                count;
 };
 
-/*
-std::string ConvertFromUtf16ToUtf8(const std::wstring& wstr)
-{
-    std::string convertedString;
-    int requiredSize = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, 0, 0, 0, 0);
-    if(requiredSize > 0)
-    {
-        std::vector<char> buffer(requiredSize);
-        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &buffer[0], requiredSize, 0, 0);
-        convertedString.assign(buffer.begin(), buffer.end() - 1);
-    }
-    return convertedString;
-}
- 
-std::wstring ConvertFromUtf8ToUtf16(const std::string& str)
-{
-    std::wstring convertedString;
-    int requiredSize = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, 0, 0);
-    if(requiredSize > 0)
-    {
-        std::vector<wchar_t> buffer(requiredSize);
-        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &buffer[0], requiredSize);
-        convertedString.assign(buffer.begin(), buffer.end() - 1);
-    }
- 
-    return convertedString;
-}*/
+std::map<std::string, DLLib*> gLoadedLibraryMap;
+std::mutex gLoadLubraryMutex;
 
+bool removeLibraryFromMap(DLLib* lib);
+
+bool removeLibraryFromMap(DLLib* lib){
+	bool found =false;
+
+	gLoadLubraryMutex.lock();
+
+	try{
+		std::list<std::map<std::string, DLLib*>::iterator> removeList;
+
+		for(std::map<std::string, DLLib*>::iterator it=gLoadedLibraryMap.begin(); it!=gLoadedLibraryMap.end() ; ++it){
+			if(it->second== lib){
+				removeList.push_front(it);
+				found = true;
+			}
+			//std::cout<<"Find library: "<<lib<<std::endl;
+		}
+
+		for(std::list<std::map<std::string, DLLib*>::iterator>::iterator it=removeList.begin(); it!=removeList.end() ; ++it){
+			gLoadedLibraryMap.erase(*it);
+			//std::cout<<"Remove library: "<<lib<<std::endl;
+		}
+
+	}catch(...){
+	  std::cerr<<"Unknown exception for cleanup library: "<<lib<<std::endl;
+	}
+
+	gLoadLubraryMutex.unlock();
+
+	return found;
+}
 
 Handle<Value> Dynload::loadLibrary(const Arguments& args) {
   HandleScope scope;
   v8::String::Utf8Value libpath(args[0]);
   DLLib *lib = NULL;
   
-#ifndef _MSC_VER
-  lib = dlLoadLibrary((*libpath));
-#else
-  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cvt;
-  std::u16string libPathStr = cvt.from_bytes(*libpath);//ConvertFromUtf8ToUtf16(*libpath);
+  try{
+	  gLoadLubraryMutex.lock();
 
-  lib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
-#endif
-  //std::wcout<<(*libpath)<<", lib: "<<lib<<std::endl;
- 
+	  std::map<std::string, DLLib*>::iterator libIterator = gLoadedLibraryMap.find(*libpath);
+
+	  if(libIterator !=gLoadedLibraryMap.end()){
+		  lib = libIterator->second;
+	  }else{
+		#ifndef _MSC_VER
+		  lib = dlLoadLibrary((*libpath));
+		#else
+		  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cvt;
+		  std::u16string libPathStr = cvt.from_bytes(*libpath);//ConvertFromUtf8ToUtf16(*libpath);
+
+		  lib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
+		#endif
+		  gLoadedLibraryMap[*libpath] = lib;
+	  }
+  }catch(...){
+	  std::cerr<<"Unknown exception for loading library: "<<*libpath<<std::endl;
+  }
+
+  gLoadLubraryMutex.unlock();
+
   return scope.Close(bridjs::Utils::wrapPointer(lib));
 }
 
 Handle<Value> Dynload::freeLibrary(const Arguments& args) {
-  HandleScope scope;
-  GET_POINTER_ARG(DLLib, lib, args, 0);
-  dlFreeLibrary(lib);
+	HandleScope scope;
+
+	GET_POINTER_ARG(DLLib, lib, args, 0);
+	dlFreeLibrary(lib);
+	if(!removeLibraryFromMap(lib)){
+		std::stringstream message;
+
+		message<<"Illegal library pointer: "<<lib<<std::endl;
+
+		return  THROW_EXCEPTION(message.str().c_str());
+	}
+
   return scope.Close(Undefined());
 }
 
@@ -101,11 +132,26 @@ Handle<Value> Dynload::symsInit(const Arguments& args) {
 #else
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cvt;
   std::u16string libPathStr = cvt.from_bytes(*libpath);//ConvertFromUtf8ToUtf16(*libpath);
+  /*
+  
+  try{
+	  gLoadLubraryMutex.lock();
 
-  DLLib* pLib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
+	  std::map<std::string, DLLib*>::iterator libIterator = gLoadedLibraryMap.find(*libpath);
+
+	  if(libIterator !=gLoadedLibraryMap.end()){
+		  pLib = libIterator->second;
+	  }else{
+		pLib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
+		gLoadedLibraryMap[*libpath] = pLib ;
+	  }
+  }catch(...){
+	  std::cerr<<"Unknown exception for loading library: "<<*libpath<<std::endl;
+  }
+  gLoadLubraryMutex.unlock();*/
 
   //std::wcout<<(*libpath)<<", lib: "<<pLib<<std::endl;
-
+  DLLib* pLib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
   pSyms = (DLSyms*)malloc(sizeof(DLSyms));
   const char* base = (const char*) pLib;
   IMAGE_DOS_HEADER*       pDOSHeader      = (IMAGE_DOS_HEADER*) base;  
@@ -127,6 +173,7 @@ Handle<Value> Dynload::symsInit(const Arguments& args) {
 Handle<Value> Dynload::symsCleanup(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLSyms, pSyms, args, 0);
+  //removeLibraryFromMap(pSyms->pLib);
   dlSymsCleanup(pSyms);
   return scope.Close(Undefined());
 }
@@ -134,6 +181,7 @@ Handle<Value> Dynload::symsCleanup(const Arguments& args) {
 Handle<Value> Dynload::symsCount(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLSyms, pSyms, args, 0);
+
   int count = dlSymsCount(pSyms);
   return scope.Close(Number::New(count));
 }

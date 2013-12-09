@@ -1,4 +1,4 @@
-/*Jiahan: Must include node.h prior to v8.h in MSVC environments*/
+/*Jiahan: Must include node.h prior to v8.h in MSVC build environments*/
 #ifdef _MSC_VER
 #include <node.h>
 #endif
@@ -97,7 +97,7 @@ void init(Handle<Object> target) {
   EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, structField);
   EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, subStruct);
   EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, closeStruct);
-  EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, structAlignment);
+  //EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, structAlignment);
   EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, freeStruct);
 
   target->Set(String::NewSymbol("dcb"), dyncallObj); 
@@ -108,3 +108,9 @@ void init(Handle<Object> target) {
 
 
 NODE_MODULE(bridjs, init);
+
+extern "C"{
+	__declspec(dllexport) double testMultiplyFunction(const int32_t x, const double y){
+		return x*y;
+	}
+}

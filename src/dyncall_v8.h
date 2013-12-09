@@ -1,6 +1,7 @@
 #ifndef _DYNCALL_V8_H
 #define _DYNCALL_V8_H
-#include <v8.h>
+
+#include <node.h>
 
 namespace bridjs{
 class Dyncall {
@@ -66,7 +67,7 @@ public:
 	static v8::Handle<v8::Value> structField(const v8::Arguments& args);
 	static v8::Handle<v8::Value> subStruct(const v8::Arguments& args);
 	static v8::Handle<v8::Value> closeStruct(const v8::Arguments& args);
-	static v8::Handle<v8::Value> structAlignment(const v8::Arguments& args);
+	//static v8::Handle<v8::Value> structAlignment(const v8::Arguments& args);
 	static v8::Handle<v8::Value> freeStruct(const v8::Arguments& args);
 }; // namespace dyncall
 }//bridjs

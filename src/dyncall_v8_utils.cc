@@ -41,24 +41,28 @@ Handle<Value> bridjs::Utils::ptr2string(void* ptr) {
 */
 Handle<Value> bridjs::Utils::wrapPointer(const void* ptr){
 	HandleScope scope;
+	Handle<Value> result;
 	void* pptr;
 
-	//memcpy(&pptr,&ptr, sizeof(void*));
+	if(ptr!=NULL){
+		node::Buffer *buf = node::Buffer::New((char*)(&ptr), sizeof(void*));
+		result =  scope.Close(buf->handle_);
+	}else{
+		result = scope.Close(v8::Null());
+	}
 
-	node::Buffer *buf = node::Buffer::New((char*)(&ptr), sizeof(void*));
+	return result;
 
-	memcpy(&pptr,node::Buffer::Data(buf), sizeof(void*));
+	//memcpy(&pptr,node::Buffer::Data(buf), sizeof(void*));
 
-//	std::cout<<(void*)ptr<<", "<<pptr<<std::endl;
-
-	return scope.Close(buf->handle_);
+	
 }
 
 
-void* bridjs::Utils::unwrapPointer(v8::Local<v8::Object> buffer){
+void* bridjs::Utils::unwrapPointer(v8::Local<v8::Value> value){
 	void* ptr;
 
-	memcpy(&ptr, node::Buffer::Data(buffer), sizeof(void*));
+	memcpy(&ptr, node::Buffer::Data(value->ToObject()), sizeof(void*));
 
 	return ptr;
 }

@@ -1,4 +1,5 @@
 lib/bridjs/win32_x64
+nb_build
 node_modules
 build
 dyncall
