@@ -189,8 +189,8 @@ Handle<Value> Dynload::symsCount(const Arguments& args) {
 Handle<Value> Dynload::symsName(const Arguments& args) {
   HandleScope scope;
   GET_POINTER_ARG(DLSyms, pSyms, args, 0);
-  GET_NUMBER_ARG(index, args, 1);
-  const char* name = dlSymsName(pSyms, (int)index);
+  GET_INT32_ARG(index, args, 1);
+  const char* name = dlSymsName(pSyms, index);
   return scope.Close(name ? String::New(name) : String::Empty());
 }
 

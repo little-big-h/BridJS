@@ -2,6 +2,7 @@
 
 #include "dyncall_v8.h"
 #include "dyncall_v8_utils.h"
+#include "native_function_v8.h"
 extern "C"
 {
         #include "dyncall.h"
@@ -12,156 +13,9 @@ extern "C"
 using namespace v8;
 using namespace bridjs;
 
-v8::Handle<v8::Value> Dyncall::CALL_C_DEFAULT(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_DEFAULT));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_ELLIPSIS(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_ELLIPSIS));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_ELLIPSIS_VARARGS(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_ELLIPSIS_VARARGS));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X86_CDECL(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X86_CDECL));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X86_WIN32_STD(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X86_WIN32_STD));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X86_WIN32_FAST_MS(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X86_WIN32_FAST_MS));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X86_WIN32_FAST_GNU(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X86_WIN32_FAST_GNU));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X86_WIN32_THIS_MS(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X86_WIN32_THIS_MS));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X86_WIN32_THIS_GNU(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X86_WIN32_THIS_GNU));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X64_WIN64(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X64_WIN64));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X64_SYSV(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X64_SYSV));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_PPC32_DARWIN(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_PPC32_DARWIN));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_PPC32_OSX(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_PPC32_OSX));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_ARM_ARM_EABI(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_ARM_ARM_EABI));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_ARM_THUMB_EABI(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_ARM_THUMB_EABI));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_MIPS32_EABI(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_MIPS32_EABI));
-}
-
-v8::Handle<v8::Value> Dyncall::CALL_C_PPC32_SYSV(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_PPC32_SYSV));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_PPC32_LINUX(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_PPC32_LINUX));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_ARM_ARM(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_ARM_ARM));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_ARM_THUMB(const v8::Arguments& args){
-		HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_ARM_THUMB));
-	}
-v8::Handle<v8::Value> Dyncall::CALL_C_MIPS32_O32(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_MIPS32_O32));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_MIPS64_N32(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_MIPS64_N32));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_MIPS64_N64(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_MIPS64_N64));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_X86_PLAN9(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_X86_PLAN9));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_SPARC32(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_SPARC32));
-}
-v8::Handle<v8::Value> Dyncall::CALL_C_SPARC64(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_C_SPARC64));
-}
-v8::Handle<v8::Value> Dyncall::CALL_SYS_DEFAULT(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_SYS_DEFAULT));
-}
-v8::Handle<v8::Value> Dyncall::CALL_SYS_X86_INT80H_LINUX(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_SYS_X86_INT80H_LINUX));
-}
-v8::Handle<v8::Value> Dyncall::CALL_SYS_X86_INT80H_BSD(const v8::Arguments& args){
-	HandleScope scope;
-
-	return scope.Close(v8::Uint32::New(DC_CALL_SYS_X86_INT80H_BSD));
-}
-
 Handle<Value> Dyncall::newCallVM(const v8::Arguments& args) {
   HandleScope scope;
-  GET_NUMBER_ARG(size, args, 0);
+  GET_INT64_ARG(size, args, 0);
   DCCallVM *vm = dcNewCallVM((int)size);
 
   //std::cout<<(void*)vm<<std::endl;
@@ -255,16 +109,22 @@ v8::Handle<v8::Value> Dyncall::argLong(const v8::Arguments& args){
 	//CHECK_ARGUMENT(args,2);
 	GET_POINTER_ARG(DCCallVM,vm,args,0);
 
-	if(sizeof(DClong)== 4){
-		GET_INT32_ARG(int32Value, args,1);
-		value = int32Value;
-	}else if(sizeof(DClong)==8){
-		GET_INT64_ARG(int64V, args,1);
-		value = (DClong)int64V;
-	}else{
-		std::stringstream message; 
-		message<<"Unknown bytes length for long type: "<<sizeof(long);
-		return THROW_EXCEPTION(message.str().c_str()); 
+	switch(sizeof(DClong)){
+		case sizeof(int32_t) :{
+			GET_INT32_ARG(int32Value, args,1);
+			value = int32Value;
+		}
+		break;
+		case sizeof(int64_t):{
+			GET_INT64_ARG(int64V, args,1);
+			value = static_cast<DClong>(int64V);
+		}
+		break;	
+		default:{
+			std::stringstream message; 
+			message<<"Unknown bytes length for DClong type: "<<sizeof(DClong);
+			return THROW_EXCEPTION(message.str().c_str()); 
+		}
 	}
 
 	dcArgLong(vm,value);
@@ -278,16 +138,22 @@ v8::Handle<v8::Value> Dyncall::argLongLong(const v8::Arguments& args){
 	//CHECK_ARGUMENT(args,2);
 	GET_POINTER_ARG(DCCallVM,vm,args,0);
 
-	if(sizeof(DClonglong)== 4){
-		GET_INT32_ARG(int32Value, args,1);
-		value = int32Value;
-	}else if(sizeof(DClong)==8){
-		GET_INT64_ARG(int64V, args,1);
-		value = int64V;
-	}else{
-		std::stringstream message; 
-		message<<"Unknown bytes length for longlong type: "<<sizeof(long);
-		return THROW_EXCEPTION(message.str().c_str()); 
+	switch(sizeof(DClonglong)){
+		case sizeof(int32_t) :{
+			GET_INT32_ARG(int32Value, args,1);
+			value = int32Value;
+		}
+		break;
+		case sizeof(int64_t):{
+			GET_INT64_ARG(int64V, args,1);
+			value = static_cast<DClonglong>(int64V);
+		}
+		break;	
+		default:{
+			std::stringstream message; 
+			message<<"Unknown bytes length for DClonglong type: "<<sizeof(DClonglong);
+			return THROW_EXCEPTION(message.str().c_str()); 
+		}
 	}
 
 	dcArgLongLong(vm,value);
@@ -355,7 +221,7 @@ v8::Handle<v8::Value> Dyncall::callBool(const v8::Arguments& args){
 
 	GET_CALL_ARG(args)
 
-	return scope.Close(v8::Boolean::New(dcCallBool(pVm, pFunction)));
+		return scope.Close(v8::Boolean::New(static_cast<bool>(dcCallBool(pVm, pFunction))));
 }
 v8::Handle<v8::Value> Dyncall::callChar(const v8::Arguments& args){
 	HandleScope scope;
@@ -403,9 +269,9 @@ v8::Handle<v8::Value> Dyncall::callLongLong(const v8::Arguments& args){
 	GET_CALL_ARG(args);
 
 	if(sizeof(DClonglong)== 4){
-		return scope.Close(v8::Int32::New(dcCallLongLong(pVm, pFunction)));
+		return scope.Close(v8::Int32::New(static_cast<int32_t>(dcCallLongLong(pVm, pFunction))));
 	}else if(sizeof(DClonglong)==8){
-		return scope.Close(v8::Integer::New(dcCallLongLong(pVm, pFunction)));
+		return scope.Close(v8::Integer::New(static_cast<int32_t>(dcCallLongLong(pVm, pFunction))));
 	}else{
 		std::stringstream message; 
 		message<<"Unknown bytes length for =long type: "<<sizeof(long);
@@ -444,6 +310,8 @@ v8::Handle<v8::Value> Dyncall::callStruct(const v8::Arguments& args){
 
 	return scope.Close(v8::Undefined());
 }
+
+
 v8::Handle<v8::Value> Dyncall::getError(const v8::Arguments& args){
 	HandleScope scope;
 
