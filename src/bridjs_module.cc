@@ -22,8 +22,6 @@ extern "C"
 #include <node.h>
 #endif
 
-#define EXPORT_FUNCTION(obj, ns, name) NODE_SET_METHOD(obj, #name, ns::name);
-
 using namespace v8;
 
 void getSignedAndUnsinedTypeFromTypeSize(const uint32_t size, char &signedType, char &unsignedType){
@@ -55,23 +53,35 @@ void getSignedAndUnsinedTypeFromTypeSize(const uint32_t size, char &signedType, 
 	}
 }
 
+extern "C"{
+	__declspec(dllexport) double testMultiplyFunction(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e){
+		return w*x*y*z*e;
+	}
+}
+
+Handle<v8::Value> TestMultiplyFunction(const v8::Arguments& args){
+	HandleScope scope;
+
+	GET_INT32_ARG(w,args,0);
+	GET_INT32_ARG(x,args,1);
+	GET_INT64_ARG(y,args,2);
+	GET_INT64_ARG(z,args,3);
+	GET_DOUBLE_ARG(e,args,4);
+
+	scope.Close(v8::Number::New(testMultiplyFunction(w,x,y,z,e)));
+}
+
 void init(Handle<Object> target) {
   Local<Object> dynloadObj = Object::New();
   Local<Object> dyncallObj = Object::New();
   Local<Object> dcbObj = Object::New();
   Local<Object> signatureObj = Object::New();
-   char signedType = DC_SIGCHAR_VOID, unsignedType = DC_SIGCHAR_VOID;
+  Local<Object> testObj = Object::New();
+  char signedType = DC_SIGCHAR_VOID, unsignedType = DC_SIGCHAR_VOID;
 
   /*dynload*/
   target->Set(String::NewSymbol("dl"), dynloadObj);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, loadLibrary);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, freeLibrary);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, findSymbol);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsInit);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsCleanup);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsCount);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsName);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsNameFromValue);
+  bridjs::Dynload::Init(dynloadObj);
   
   /*dyncall*/
   target->Set(String::NewSymbol("dc"), dyncallObj);
@@ -239,15 +249,13 @@ void init(Handle<Object> target) {
   bridjs::Pointer::Init(dyncallObj);
   bridjs::NativeFunction::Init(dyncallObj);
 
+  /*Test module*/
+  target->Set(String::NewSymbol("test"),testObj);
+  NODE_SET_METHOD(testObj,"testMultiplyFunction", TestMultiplyFunction);
+
   std::locale::global(std::locale(""));
   std::wcout.imbue(std::locale(""));
 }
 
 
 NODE_MODULE(bridjs, init);
-
-extern "C"{
-	__declspec(dllexport) double testMultiplyFunction(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e){
-		return w*x*y*z*e;
-	}
-}

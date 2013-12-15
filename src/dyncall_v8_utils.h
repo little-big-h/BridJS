@@ -2,6 +2,8 @@
 #include <node_buffer.h>
 #include <sstream>
 
+#define EXPORT_FUNCTION(obj, ns, name) NODE_SET_METHOD(obj, #name, ns::name);
+
 #define GET_CALL_ARG(args) \
 	GET_POINTER_ARG(DCCallVM,pVm,args,0)\
 	GET_POINTER_ARG(char,pFunction,args,1);

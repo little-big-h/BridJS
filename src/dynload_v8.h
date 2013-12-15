@@ -15,6 +15,7 @@ static v8::Handle<v8::Value> symsCount(const v8::Arguments& args);
 static v8::Handle<v8::Value> symsName(const v8::Arguments& args);
 static v8::Handle<v8::Value> symsNameFromValue(const v8::Arguments& args);
 
+static void Init(v8::Handle<v8::Object> exports);
 }; // namespace dynload
 }//
 #endif  // _DYNLOAD_V8_H

@@ -4,7 +4,6 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include <mutex>
 #include <list>
 
 #ifdef _MSC_VER
@@ -14,6 +13,7 @@
 extern "C"
 {
     #include "dynload.h"
+	#include <uv.h>	
 #ifdef _MSC_VER
 	#include <Windows.h>
 #endif
@@ -32,14 +32,16 @@ struct DLSyms_
 };
 
 std::map<std::string, DLLib*> gLoadedLibraryMap;
-std::mutex gLoadLubraryMutex;
+uv_mutex_t gLoadLubraryMutex;
+
 
 bool removeLibraryFromMap(DLLib* lib);
 
 bool removeLibraryFromMap(DLLib* lib){
 	bool found =false;
 
-	gLoadLubraryMutex.lock();
+	uv_mutex_lock(&gLoadLubraryMutex);
+	//gLoadLubraryMutex.lock();
 
 	try{
 		std::list<std::map<std::string, DLLib*>::iterator> removeList;
@@ -61,9 +63,28 @@ bool removeLibraryFromMap(DLLib* lib){
 	  std::cerr<<"Unknown exception for cleanup library: "<<lib<<std::endl;
 	}
 
-	gLoadLubraryMutex.unlock();
+	uv_mutex_unlock(&gLoadLubraryMutex);
 
 	return found;
+}
+
+void Dynload::Init(v8::Handle<v8::Object> dynloadObj){
+	int32_t error = uv_mutex_init(&gLoadLubraryMutex);
+	if(error!=0){
+		char* message = "Fail to init gLoadLubraryMutex";
+		std::cerr<<message<<std::endl;
+
+		throw std::runtime_error(message);
+	}
+
+	EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, loadLibrary);
+  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, freeLibrary);
+  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, findSymbol);
+  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsInit);
+  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsCleanup);
+  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsCount);
+  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsName);
+  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsNameFromValue);
 }
 
 Handle<Value> Dynload::loadLibrary(const Arguments& args) {
@@ -72,7 +93,7 @@ Handle<Value> Dynload::loadLibrary(const Arguments& args) {
   DLLib *lib = NULL;
   
   try{
-	  gLoadLubraryMutex.lock();
+	  uv_mutex_lock(&gLoadLubraryMutex);;
 
 	  std::map<std::string, DLLib*>::iterator libIterator = gLoadedLibraryMap.find(*libpath);
 
@@ -93,7 +114,7 @@ Handle<Value> Dynload::loadLibrary(const Arguments& args) {
 	  std::cerr<<"Unknown exception for loading library: "<<*libpath<<std::endl;
   }
 
-  gLoadLubraryMutex.unlock();
+  uv_mutex_unlock(&gLoadLubraryMutex);
 
   return scope.Close(bridjs::Utils::wrapPointer(lib));
 }
@@ -132,25 +153,6 @@ Handle<Value> Dynload::symsInit(const Arguments& args) {
 #else
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cvt;
   std::u16string libPathStr = cvt.from_bytes(*libpath);//ConvertFromUtf8ToUtf16(*libpath);
-  /*
-  
-  try{
-	  gLoadLubraryMutex.lock();
-
-	  std::map<std::string, DLLib*>::iterator libIterator = gLoadedLibraryMap.find(*libpath);
-
-	  if(libIterator !=gLoadedLibraryMap.end()){
-		  pLib = libIterator->second;
-	  }else{
-		pLib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
-		gLoadedLibraryMap[*libpath] = pLib ;
-	  }
-  }catch(...){
-	  std::cerr<<"Unknown exception for loading library: "<<*libpath<<std::endl;
-  }
-  gLoadLubraryMutex.unlock();*/
-
-  //std::wcout<<(*libpath)<<", lib: "<<pLib<<std::endl;
   DLLib* pLib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
   pSyms = (DLSyms*)malloc(sizeof(DLSyms));
   const char* base = (const char*) pLib;
