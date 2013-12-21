@@ -33,7 +33,7 @@ public:
 	const char getReturnType() const;
 	const char getArgumentType(const uint32_t index) const ;
 	const size_t getArgumentLength() const;
-private:
+protected:
 	static v8::Persistent<v8::Function> constructor;
 	//DCCallVM *mpVm;
 	void* mpSymbol;

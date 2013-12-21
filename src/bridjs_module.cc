@@ -1,7 +1,4 @@
 /*Jiahan: Must include node.h prior to v8.h in MSVC build environments*/
-#ifdef _MSC_VER
-#include <node.h>
-#endif
 
 #include "dyncall_v8.h"
 #include "dyncallback_v8.h"
@@ -9,18 +6,10 @@
 #include "pointer_v8.h"
 #include "native_function_v8.h"
 #include "dyncall_v8_utils.h"
+#include "test.h"
 
 #include <iostream>
-#include <math.h>
-
-extern "C"
-{
-	#include "dyncall_signature.h"
-}
-
-#ifndef _MSC_VER
 #include <node.h>
-#endif
 
 using namespace v8;
 
@@ -53,27 +42,10 @@ void getSignedAndUnsinedTypeFromTypeSize(const uint32_t size, char &signedType, 
 	}
 }
 
-extern "C"{
-	__declspec(dllexport) double testMultiplyFunction(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e){
-		return w*x*y*z*e;
-	}
-}
-
-Handle<v8::Value> TestMultiplyFunction(const v8::Arguments& args){
-	HandleScope scope;
-
-	GET_INT32_ARG(w,args,0);
-	GET_INT32_ARG(x,args,1);
-	GET_INT64_ARG(y,args,2);
-	GET_INT64_ARG(z,args,3);
-	GET_DOUBLE_ARG(e,args,4);
-
-	scope.Close(v8::Number::New(testMultiplyFunction(w,x,y,z,e)));
-}
-
 void init(Handle<Object> target) {
   Local<Object> dynloadObj = Object::New();
   Local<Object> dyncallObj = Object::New();
+  Local<Object> dyncallBackObj = Object::New();
   Local<Object> dcbObj = Object::New();
   Local<Object> signatureObj = Object::New();
   Local<Object> testObj = Object::New();
@@ -179,6 +151,10 @@ void init(Handle<Object> target) {
 		  bridjs::Utils::toV8String(DC_SIGCHAR_STRING), ReadOnly);
 	signatureObj->Set(String::NewSymbol("STRUCT_TYPE"),
 		  bridjs::Utils::toV8String(DC_SIGCHAR_STRUCT), ReadOnly);
+
+	signatureObj->Set(String::NewSymbol("CALLBACK_TYPE"),
+		  bridjs::Utils::toV8String(DC_SIGCHAR_POINTER), ReadOnly);
+
 	signatureObj->Set(String::NewSymbol("ENDARG"),
 		  bridjs::Utils::toV8String(DC_SIGCHAR_ENDARG), ReadOnly);
 	/*INT8*/
@@ -244,14 +220,17 @@ void init(Handle<Object> target) {
   //EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, structAlignment);
   EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, freeStruct);
 
-  target->Set(String::NewSymbol("dcb"), dyncallObj); 
 
   bridjs::Pointer::Init(dyncallObj);
   bridjs::NativeFunction::Init(dyncallObj);
 
+  /*dyncallback*/
+  target->Set(String::NewSymbol("dcb"), dyncallBackObj);
+  bridjs::Dyncallback::Init(dyncallBackObj);
+
   /*Test module*/
   target->Set(String::NewSymbol("test"),testObj);
-  NODE_SET_METHOD(testObj,"testMultiplyFunction", TestMultiplyFunction);
+  NODE_SET_METHOD(testObj,"testMultiplyFunction", bridjs::Test::TestMultiplyFunction);
 
   std::locale::global(std::locale(""));
   std::wcout.imbue(std::locale(""));

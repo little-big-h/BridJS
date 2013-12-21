@@ -7,22 +7,42 @@ using namespace node;
 
 Persistent<Function> Pointer::constructor;
 
+v8::Handle<v8::Value> ToString(const v8::Arguments& args);
+
+
+
 void Pointer::Init(v8::Handle<v8::Object> exports){
 	// Prepare constructor template
 	  Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
 	  tpl->SetClassName(String::NewSymbol("Pointer"));
-	  tpl->InstanceTemplate()->SetInternalFieldCount(2);
+	  tpl->InstanceTemplate()->SetInternalFieldCount(3);
 	  // Prototype
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("getAddress"),
 		  FunctionTemplate::New(GetAddress)->GetFunction());
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("isNull"),
 		  FunctionTemplate::New(IsNull)->GetFunction());
+	  tpl->PrototypeTemplate()->Set(String::NewSymbol("toString"),
+		  FunctionTemplate::New(ToString)->GetFunction());
 	  constructor = Persistent<Function>::New(tpl->GetFunction());
 	  exports->Set(String::NewSymbol("Pointer"), constructor);
 }
 
+v8::Handle<v8::Value> ToString(const v8::Arguments& args){
+	HandleScope scope;
+	Pointer* obj = ObjectWrap::Unwrap<Pointer>(args.This());
+	std::stringstream ptrStream;
+
+	ptrStream<<"Pointer: "<<std::hex<<obj->getPointer()<<std::endl;
+
+	return scope.Close(String::New((ptrStream.str().c_str())));
+}
+
 Pointer::Pointer(const void* ptr){
 	this->mPtr = ptr;
+}
+
+void* Pointer::getPointer(){
+	return const_cast<void*>(this->mPtr);
 }
 
 const void* Pointer::Data(v8::Handle<v8::Object> val){

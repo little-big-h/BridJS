@@ -78,13 +78,13 @@ void Dynload::Init(v8::Handle<v8::Object> dynloadObj){
 	}
 
 	EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, loadLibrary);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, freeLibrary);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, findSymbol);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsInit);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsCleanup);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsCount);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsName);
-  EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsNameFromValue);
+    EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, freeLibrary);
+    EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, findSymbol);
+    EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsInit);
+    EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsCleanup);
+    EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsCount);
+    EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsName);
+    EXPORT_FUNCTION(dynloadObj,bridjs::Dynload, symsNameFromValue);
 }
 
 Handle<Value> Dynload::loadLibrary(const Arguments& args) {

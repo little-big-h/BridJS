@@ -100,9 +100,21 @@ const void* bridjs::Utils::unwrapPointer(v8::Local<v8::Value> value){
 	return ptr;
 }
 
-v8::Local<v8::String> bridjs::Utils::toV8String(const char val){
+v8::Handle<v8::String> bridjs::Utils::toV8String(const char val){
 	//HandleScope scope;
 	char str[] = {val, '\0'};
 
 	return v8::String::New(str);
+}
+
+bridjs::ValueWrapper::ValueWrapper(v8::Persistent<v8::Value> value){
+	this->mValue = value;
+}
+
+v8::Handle<v8::Value> bridjs::ValueWrapper::getValue(){
+	return this->mValue;
+}
+bridjs::ValueWrapper::~ValueWrapper(){
+	this->mValue.Dispose();
+	this->mValue.Clear();
 }

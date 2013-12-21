@@ -18,7 +18,9 @@ Persistent<v8::Function> bridjs::NativeFunction::constructor;
 v8::Handle<v8::Value> pushArgs(DCCallVM *vm,const bridjs::NativeFunction *nativeFunction, const v8::Arguments& args, const uint32_t offset){
 	HandleScope scope;
 	uint32_t i;
-	for(uint32_t k=0; k<nativeFunction->getArgumentLength();++k){
+	const size_t length = nativeFunction->getArgumentLength();
+
+	for(uint32_t k=0; k<length;++k){
 		i =k+offset;
 		switch(nativeFunction->getArgumentType(k)){
 		case DC_SIGCHAR_BOOL:{
@@ -227,7 +229,10 @@ v8::Handle<v8::Value> convertDataByType(std::shared_ptr<void> spData,const char 
 			return v8::Number::New(static_cast<double>(*(static_cast<DCdouble*>(pData))));
 			}
 			break;
-		case DC_SIGCHAR_STRING:
+		case DC_SIGCHAR_STRING:{
+			return WRAP_STRING(*(static_cast<const char**>(pData)));
+			}
+			break;
         case DC_SIGCHAR_POINTER:{
 			return bridjs::Utils::wrapPointer(*(static_cast<DCpointer*>(pData)));
 			}
@@ -267,6 +272,8 @@ void afterCallAsync(uv_work_t *req){
 	}else{
 		std::cerr<<"Fail to cast data pointer to AsyncCall"<<std::endl;
 	}
+
+	delete req;
 
 	//std::cout<<"Got it2"<<std::endl;
 }
@@ -581,6 +588,9 @@ void AsyncCallTask::done(){
 			std::cerr<<"Illegal callback object: "<<(*v8::String::Utf8Value(this->mpCallbackObject->ToString()))<<std::endl;
 		}
 	}
+
+	this->mpCallbackObject.Dispose();
+	this->mpCallbackObject.Clear();
 }
 
 AsyncCallTask::~AsyncCallTask(){
