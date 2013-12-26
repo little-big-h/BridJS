@@ -169,86 +169,6 @@ std::shared_ptr<void> callByType(DCCallVM *vm,const bridjs::NativeFunction *nati
 	return data;
 }
 
-v8::Handle<v8::Value> convertDataByType(std::shared_ptr<void> spData,const char type){
-	void* pData = spData.get();
-
-	switch(type){
-		case DC_SIGCHAR_VOID:{
-			return v8::Undefined();
-			}
-			break;
-		case DC_SIGCHAR_BOOL:{
-			return v8::Boolean::New(*(static_cast<DCbool*>(pData)));
-			}
-			break;
-		case DC_SIGCHAR_UCHAR:{
-			return (bridjs::Utils::toV8String(*(static_cast<DCuchar*>(pData))));
-			}
-			break;
-		case DC_SIGCHAR_CHAR:{
-			return (bridjs::Utils::toV8String(*(static_cast<DCchar*>(pData))));
-			}
-			break;
-        case DC_SIGCHAR_SHORT:{
-			return v8::Int32::New(*(static_cast<DCshort*>(pData)));
-			}
-			break;
-		case DC_SIGCHAR_USHORT:{
-			return v8::Uint32::New(*(static_cast<DCushort*>(pData)));
-			}
-			break;
-        case DC_SIGCHAR_INT:{
-			return v8::Int32::New(*(static_cast<DCint*>(pData)));
-			}
-			break;
-		case DC_SIGCHAR_UINT:{
-			return v8::Uint32::New(*(static_cast<DCuint*>(pData)));
-			}
-			break; 
-        case DC_SIGCHAR_LONG:{
-			return v8::Number::New(*(static_cast<DClong*>(pData)));
-			}
-			break;
-		case DC_SIGCHAR_ULONG:{
-			return v8::Number::New(*(static_cast<DCulong*>(pData)));
-			}
-			break;
-		case DC_SIGCHAR_LONGLONG:{
-			return v8::Number::New(static_cast<double>(*(static_cast<DClonglong*>(pData))));
-			}
-			break;
-		case DC_SIGCHAR_ULONGLONG:{
-			return v8::Number::New(static_cast<double>(*(static_cast<DCulonglong*>(pData))));
-			}
-			break;
-        case DC_SIGCHAR_FLOAT:{
-			return v8::Number::New(static_cast<double>(*(static_cast<DCfloat*>(pData))));
-			}
-			break;
-        case DC_SIGCHAR_DOUBLE:{
-			return v8::Number::New(static_cast<double>(*(static_cast<DCdouble*>(pData))));
-			}
-			break;
-		case DC_SIGCHAR_STRING:{
-			return WRAP_STRING(*(static_cast<const char**>(pData)));
-			}
-			break;
-        case DC_SIGCHAR_POINTER:{
-			return bridjs::Utils::wrapPointer(*(static_cast<DCpointer*>(pData)));
-			}
-			break;
-		case DC_SIGCHAR_STRUCT:{
-			return v8::Exception::TypeError(v8::String::New("Not implement"));
-		    }
-			break;
-
-		default:
-			std::stringstream message;
-			message<<"Unknown returnType: "<<type<<std::endl;
-
-			return v8::Exception::TypeError(v8::String::New(message.str().c_str()));
-		}
-}
 
 void executeCallAsync(uv_work_t *req){
 	AsyncCallTask *pAsyncCall = static_cast<AsyncCallTask*>(req->data);
@@ -416,7 +336,7 @@ v8::Handle<v8::Value> bridjs::NativeFunction::Call(const v8::Arguments& args){
 			error = pushArgs(vm,nativeFunction, args,1);
 
 			if(error->IsNull()){
-				Handle<Value> returnValue =convertDataByType(callByType(vm,nativeFunction), nativeFunction->getReturnType());
+				Handle<Value> returnValue =bridjs::Utils::convertDataByType(callByType(vm,nativeFunction), nativeFunction->getReturnType());
 				DCint errorCode = dcGetError(vm);
 
 				if(errorCode!=0){
@@ -567,7 +487,7 @@ void AsyncCallTask::done(){
 
 		if(onDoneValue->IsFunction()){
 			v8::Local<v8::Function> onDoneFunction = v8::Local<Function>::Cast(onDoneValue);
-			Handle<Value> argv[] = { bridjs::Utils::wrapPointer(this->mpVM), convertDataByType(this->mpData,this->mpNativeFunction->getReturnType())};
+			Handle<Value> argv[] = { bridjs::Utils::wrapPointer(this->mpVM), bridjs::Utils::convertDataByType(this->mpData,this->mpNativeFunction->getReturnType())};
 
 			onDoneFunction->Call(this->mpCallbackObject,2, argv);
 		}else{

@@ -32,7 +32,7 @@ v8::Handle<v8::Value> ToString(const v8::Arguments& args){
 	Pointer* obj = ObjectWrap::Unwrap<Pointer>(args.This());
 	std::stringstream ptrStream;
 
-	ptrStream<<"Pointer: "<<std::hex<<obj->getPointer()<<std::endl;
+	ptrStream<<"Pointer: "<<std::hex<<obj->getAddress()<<std::endl;
 
 	return scope.Close(String::New((ptrStream.str().c_str())));
 }
@@ -41,7 +41,7 @@ Pointer::Pointer(const void* ptr){
 	this->mPtr = ptr;
 }
 
-void* Pointer::getPointer(){
+void* Pointer::getAddress(){
 	return const_cast<void*>(this->mPtr);
 }
 
@@ -50,7 +50,7 @@ const void* Pointer::Data(v8::Handle<v8::Object> val){
 	Pointer* obj = ObjectWrap::Unwrap<Pointer>(val);
 
 
-	return obj->mPtr;
+	return obj->getAddress();
 }
 
 Pointer* Pointer::New(const void* ptr){

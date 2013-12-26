@@ -46,6 +46,8 @@ public:
 	static v8::Handle<v8::Value> closeStruct(const v8::Arguments& args);
 	//static v8::Handle<v8::Value> structAlignment(const v8::Arguments& args);
 	static v8::Handle<v8::Value> freeStruct(const v8::Arguments& args);
+	static v8::Handle<v8::Value> structSize(const v8::Arguments& args);
+	static v8::Handle<v8::Value> defineStruct(const v8::Arguments& args);
 }; // namespace dyncall
 }//bridjs
 #endif  // _DYNCALL_V8_H

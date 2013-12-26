@@ -1,6 +1,7 @@
 #pragma once
 #include <node_buffer.h>
 #include <sstream>
+#include <memory>
 
 #define EXPORT_FUNCTION(obj, ns, name) NODE_SET_METHOD(obj, #name, ns::name);
 
@@ -247,11 +248,14 @@ namespace bridjs {
 
 	class Utils{
 	public:
+		static void Init(v8::Handle<v8::Object> utilsObj);
 		static v8::Handle<v8::Value> wrapPointerToBuffer(const void* ptr);
 		static void* unwrapBufferToPointer(v8::Local<v8::Value> value);
 		static v8::Handle<v8::Value> wrapPointer(const void* ptr);
 		static const void* unwrapPointer(v8::Local<v8::Value> buffer);
 		static v8::Handle<v8::String> toV8String(const char val);
+		static size_t getTypeSize(const char type);
+		static v8::Handle<v8::Value> convertDataByType(std::shared_ptr<void> spData,const char type);
 	};
 	class ValueWrapper{
 	private:

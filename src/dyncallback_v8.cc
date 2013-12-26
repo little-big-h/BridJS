@@ -396,10 +396,10 @@ v8::Handle<Value> setReturnValue(DCValue* value,Local<Value> returnValue, Callba
 			}
 			break;
 		case DC_SIGCHAR_STRING:{
-			GET_STRING_VALUE(rValue,returnValue,0);
-			v8::String::Utf8Value valueStr(rValue);
-			value->Z = *valueStr;
+			GET_POINTER_VALUE(const char,rValue,returnValue,0);
+			value->Z = rValue;
 			}
+		    break;
         case DC_SIGCHAR_POINTER:{
 			GET_POINTER_VALUE(void, rValue,returnValue,0);
 			value->p = (rValue);
@@ -438,7 +438,7 @@ char callbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, void* userda
 
 void invokeV8Callback(uv_async_t *handle, int status /*UNUSED*/) {
 	CallbackTask *pCallTask = static_cast<CallbackTask*>(handle->data);
-	//std::cout<<"2222222222222222"<<std::endl;
+
 	if(pCallTask!=NULL){
 		pCallTask->done();
 	}else{

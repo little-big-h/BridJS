@@ -155,18 +155,27 @@ Handle<Value> Dynload::symsInit(const Arguments& args) {
   std::u16string libPathStr = cvt.from_bytes(*libpath);//ConvertFromUtf8ToUtf16(*libpath);
   DLLib* pLib = (DLLib*)LoadLibraryW((LPCWSTR)libPathStr.c_str());
   pSyms = (DLSyms*)malloc(sizeof(DLSyms));
-  const char* base = (const char*) pLib;
-  IMAGE_DOS_HEADER*       pDOSHeader      = (IMAGE_DOS_HEADER*) base;  
-  IMAGE_NT_HEADERS*       pNTHeader       = (IMAGE_NT_HEADERS*) ( base + pDOSHeader->e_lfanew );  
-  IMAGE_DATA_DIRECTORY*   pExportsDataDir = &pNTHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-  IMAGE_EXPORT_DIRECTORY* pExports        = (IMAGE_EXPORT_DIRECTORY*) (base + pExportsDataDir->VirtualAddress);  
 
-  pSyms->pBase  = base;
-  pSyms->pNames = (DWORD*)(base + pExports->AddressOfNames);
-  pSyms->pFuncs = (DWORD*)(base + pExports->AddressOfFunctions);
-  pSyms->pOrds  = (unsigned short*)(base + pExports->AddressOfNameOrdinals);
-  pSyms->count  = (size_t)pExports->NumberOfNames;
-  pSyms->pLib   = pLib;
+  if(pSyms!=NULL){
+	  const char* base = (const char*) pLib;
+	  IMAGE_DOS_HEADER*       pDOSHeader      = (IMAGE_DOS_HEADER*) base;  
+	  if(pDOSHeader!=NULL){
+		  IMAGE_NT_HEADERS*       pNTHeader       = (IMAGE_NT_HEADERS*) ( base + pDOSHeader->e_lfanew );  
+		  IMAGE_DATA_DIRECTORY*   pExportsDataDir = &pNTHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+		  IMAGE_EXPORT_DIRECTORY* pExports        = (IMAGE_EXPORT_DIRECTORY*) (base + pExportsDataDir->VirtualAddress);  
+
+		  pSyms->pBase  = base;
+		  pSyms->pNames = (DWORD*)(base + pExports->AddressOfNames);
+		  pSyms->pFuncs = (DWORD*)(base + pExports->AddressOfFunctions);
+		  pSyms->pOrds  = (unsigned short*)(base + pExports->AddressOfNameOrdinals);
+		  pSyms->count  = (size_t)pExports->NumberOfNames;
+		  pSyms->pLib   = pLib;
+	  }else{
+		  throw std::exception("Fail to allocate DLSyms");
+	  }
+  }else{
+	  throw std::exception("Fail to load library symbols");
+  }
 #endif
 
   return scope.Close(bridjs::Utils::wrapPointer(pSyms));

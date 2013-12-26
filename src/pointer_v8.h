@@ -13,13 +13,15 @@ public:
 	static v8::Handle<v8::Value> IsNull(const v8::Arguments& args);
 	static const void* Data(v8::Handle<v8::Object> val);
 
-	void* getPointer();
-private:
+	virtual void* getAddress();
+	virtual ~Pointer();
+
+protected:
 	static v8::Persistent<v8::Function> constructor;
 	const void* mPtr;
 
 	explicit Pointer(const void* ptr);
-	~Pointer();
+	
 	
 	
 }; // namespace dyncall

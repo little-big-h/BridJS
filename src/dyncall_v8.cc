@@ -194,6 +194,9 @@ v8::Handle<v8::Value> Dyncall::argPointer(const v8::Arguments& args){
 
 	return scope.Close(v8::Undefined());
 }
+
+#include "test.h"
+
 v8::Handle<v8::Value> Dyncall::argStruct(const v8::Arguments& args){
 	HandleScope scope;
 
@@ -201,6 +204,7 @@ v8::Handle<v8::Value> Dyncall::argStruct(const v8::Arguments& args){
 	GET_POINTER_ARG(DCCallVM,vm,args,0);
 	GET_POINTER_ARG(DCstruct,structPtr, args,1);
 	GET_POINTER_ARG(char,value, args,2);
+
 
 	dcArgStruct(vm, structPtr, value);
 
@@ -335,7 +339,7 @@ v8::Handle<v8::Value> Dyncall::structField(const v8::Arguments& args){
 	HandleScope scope;
 
 	GET_POINTER_ARG(DCstruct,structPtr, args,0);
-	GET_INT32_ARG(type, args, 1);
+	GET_CHAR_ARG(type, args, 1);
 	GET_INT32_ARG(aligment, args,2);
 	GET_INT64_ARG(arrayLength, args,3);
 
@@ -381,4 +385,20 @@ v8::Handle<v8::Value> Dyncall::freeStruct(const v8::Arguments& args){
 	dcFreeStruct(structPtr);
 
 	return scope.Close(v8::Undefined());
+}
+
+v8::Handle<v8::Value> Dyncall::structSize(const v8::Arguments& args){
+	HandleScope scope;
+
+	GET_POINTER_ARG(DCstruct,structPtr, args,0);
+
+	return scope.Close(WRAP_UINT(dcStructSize(structPtr)));
+}
+
+v8::Handle<v8::Value> Dyncall::defineStruct(const v8::Arguments& args){
+	HandleScope scope;
+
+	GET_STRING_ARG(signature, args,0);
+
+	return scope.Close(WRAP_POINTER(dcDefineStruct(*v8::String::Utf8Value(signature))));
 }

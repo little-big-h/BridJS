@@ -6,6 +6,7 @@
 #include "pointer_v8.h"
 #include "native_function_v8.h"
 #include "dyncall_v8_utils.h"
+#include "struct_v8.h"
 #include "test.h"
 
 #include <iostream>
@@ -43,11 +44,14 @@ void getSignedAndUnsinedTypeFromTypeSize(const uint32_t size, char &signedType, 
 }
 
 void init(Handle<Object> target) {
+  HandleScope scope;	
+
   Local<Object> dynloadObj = Object::New();
   Local<Object> dyncallObj = Object::New();
   Local<Object> dyncallBackObj = Object::New();
   Local<Object> dcbObj = Object::New();
   Local<Object> signatureObj = Object::New();
+  Local<Object> utilsObj = Object::New();
   Local<Object> testObj = Object::New();
   char signedType = DC_SIGCHAR_VOID, unsignedType = DC_SIGCHAR_VOID;
 
@@ -116,8 +120,13 @@ void init(Handle<Object> target) {
 		  v8::Int32::New(DC_CALL_SYS_X86_INT80H_LINUX),ReadOnly);
 	dyncallObj->Set(String::NewSymbol("CALL_SYS_X86_INT80H_BSD"),
 		  v8::Int32::New(DC_CALL_SYS_X86_INT80H_BSD),ReadOnly);
+	
+	dyncallObj->Set(String::NewSymbol("DEFAULT_ALIGNMENT"),
+		v8::Uint32::New(DEFAULT_ALIGNMENT), ReadOnly);
+	
 	dyncallObj->Set(String::NewSymbol("Signature"),
 		signatureObj,ReadOnly);
+
 	/*Signature*/
 	signatureObj->Set(String::NewSymbol("VOID_TYPE"),
 		  bridjs::Utils::toV8String( DC_SIGCHAR_VOID),ReadOnly);
@@ -219,14 +228,18 @@ void init(Handle<Object> target) {
   EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, closeStruct);
   //EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, structAlignment);
   EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, freeStruct);
-
+  EXPORT_FUNCTION(dyncallObj,bridjs::Dyncall, structSize);
 
   bridjs::Pointer::Init(dyncallObj);
   bridjs::NativeFunction::Init(dyncallObj);
-
+  bridjs::Struct::Init(dyncallObj);
   /*dyncallback*/
-  target->Set(String::NewSymbol("dcb"), dyncallBackObj);
+  target->Set(String::NewSymbol("dcb"), dyncallBackObj, ReadOnly);
   bridjs::Dyncallback::Init(dyncallBackObj);
+
+  /*Utils module*/
+  target->Set(String::NewSymbol("utils"),utilsObj, ReadOnly);
+  bridjs::Utils::Init(utilsObj);
 
   /*Test module*/
   target->Set(String::NewSymbol("test"),testObj);
@@ -234,6 +247,8 @@ void init(Handle<Object> target) {
 
   std::locale::global(std::locale(""));
   std::wcout.imbue(std::locale(""));
+
+ // bridjs::Test::test();
 }
 
 

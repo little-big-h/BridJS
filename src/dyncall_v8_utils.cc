@@ -2,6 +2,12 @@
 #include "pointer_v8.h"
 #include <iostream>
 
+extern "C"
+{
+    #include "dyncall.h"    
+	#include "dyncall_signature.h"
+}
+
 using namespace v8;
 /*
 void* bridjs::Utils::string2ptr(Local<Value> value) {
@@ -39,6 +45,127 @@ Handle<Value> bridjs::Utils::ptr2string(void* ptr) {
   return String::New(str);
 }
 */
+v8::Handle<v8::Value> GetTypeSize(const v8::Arguments& args);
+v8::Handle<v8::Value> WriteInt64(const v8::Arguments& args);
+
+size_t bridjs::Utils::getTypeSize(const char type){
+	size_t size;
+
+		switch(type){
+		/*
+		case DC_SIGCHAR_VOID:{
+			size = sizeof(DCbool);
+			}
+			break;*/
+		case DC_SIGCHAR_BOOL:{
+			size = sizeof(DCbool);
+			}
+			break;
+		case DC_SIGCHAR_UCHAR:{
+			size = sizeof(DCuchar);
+			}
+			break;
+		case DC_SIGCHAR_CHAR:{
+			size = sizeof(DCchar);
+			}
+			break;
+        case DC_SIGCHAR_SHORT:{
+			size = sizeof(DCshort);
+			}
+			break;
+		case DC_SIGCHAR_USHORT:{
+			size = sizeof(DCushort);
+			}
+			break;
+        case DC_SIGCHAR_INT:{
+			size = sizeof(DCint);
+			}
+			break;
+		case DC_SIGCHAR_UINT:{
+			size = sizeof(DCuint);
+			}
+			break; 
+        case DC_SIGCHAR_LONG:{
+			size = sizeof(DClong);
+			}
+			break;
+		case DC_SIGCHAR_ULONG:{
+			size = sizeof(DCulong);
+			}
+			break;
+		case DC_SIGCHAR_LONGLONG:{
+			size = sizeof(DClonglong);
+			}
+			break;
+		case DC_SIGCHAR_ULONGLONG:{
+			size = sizeof(DCulonglong);
+			}
+			break;
+        case DC_SIGCHAR_FLOAT:{
+			size = sizeof(DCfloat);
+			}
+			break;
+        case DC_SIGCHAR_DOUBLE:{
+			size = sizeof(DCdouble);
+			}
+			break;
+		case DC_SIGCHAR_STRING:
+        case DC_SIGCHAR_POINTER:{
+			size = sizeof(DCpointer);
+			}
+			break;
+			/*
+		case DC_SIGCHAR_STRUCT:{
+			std::cerr<<"Not implement"<<std::endl;
+			GET_POINTER_VALUE(void, rValue,returnValue,0);
+			value->p = (rValue);
+		    }
+			break;*/
+
+		default:
+			std::stringstream message;
+			message<<"Unknown type: "<<type<<std::endl;
+			//throw std::runtime_error(message.str());
+			throw std::exception(message.str().c_str());
+		}
+	
+		return size;
+}
+
+v8::Handle<v8::Value> GetTypeSize(const v8::Arguments& args){
+	try{
+		HandleScope scope;
+		size_t size;
+
+		GET_CHAR_ARG(type, args, 0);
+
+		size =  bridjs::Utils::getTypeSize(type);
+
+		return scope.Close(WRAP_ULONGLONG(size));
+	}catch(std::exception &e){
+		return v8::Exception::TypeError(v8::String::New(e.what()));
+	}
+
+}
+
+v8::Handle<v8::Value> WriteInt64(const v8::Arguments& args){
+	HandleScope scope;
+
+	GET_POINTER_ARG(const char, ptr,args,0);
+	GET_INT64_ARG(offset,args,1);
+	GET_INT64_ARG(value,args,2);
+
+	ptr += offset;
+
+	(*(int64_t*)ptr) = value;
+
+	scope.Close(v8::Undefined());
+}
+
+void bridjs::Utils::Init(v8::Handle<v8::Object> utilsObj){
+	NODE_SET_METHOD(utilsObj,"getTypeSize",GetTypeSize);
+	NODE_SET_METHOD(utilsObj,"writeInt64",WriteInt64);
+}
 
 Handle<Value> bridjs::Utils::wrapPointerToBuffer(const void* ptr){
 	HandleScope scope;
@@ -93,6 +220,8 @@ const void* bridjs::Utils::unwrapPointer(v8::Local<v8::Value> value){
 	//memcpy(&ptr, node::Buffer::Data(value->ToObject()), sizeof(void*));
 	if(value->IsNull()){
 		ptr = NULL;
+	}else if(node::Buffer::HasInstance(value)){
+		ptr = node::Buffer::Data(value);
 	}else{
 		ptr = bridjs::Pointer::Data(value->ToObject());
 	}
@@ -114,7 +243,91 @@ bridjs::ValueWrapper::ValueWrapper(v8::Persistent<v8::Value> value){
 v8::Handle<v8::Value> bridjs::ValueWrapper::getValue(){
 	return this->mValue;
 }
+
+v8::Handle<v8::Value> bridjs::Utils::convertDataByType(std::shared_ptr<void> spData,const char type){
+	void* pData = spData.get();
+
+	switch(type){
+		case DC_SIGCHAR_VOID:{
+			return v8::Undefined();
+			}
+			break;
+		case DC_SIGCHAR_BOOL:{
+			return v8::Boolean::New(*(static_cast<DCbool*>(pData)));
+			}
+			break;
+		case DC_SIGCHAR_UCHAR:{
+			return (bridjs::Utils::toV8String(*(static_cast<DCuchar*>(pData))));
+			}
+			break;
+		case DC_SIGCHAR_CHAR:{
+			return (bridjs::Utils::toV8String(*(static_cast<DCchar*>(pData))));
+			}
+			break;
+        case DC_SIGCHAR_SHORT:{
+			return v8::Int32::New(*(static_cast<DCshort*>(pData)));
+			}
+			break;
+		case DC_SIGCHAR_USHORT:{
+			return v8::Uint32::New(*(static_cast<DCushort*>(pData)));
+			}
+			break;
+        case DC_SIGCHAR_INT:{
+			return v8::Int32::New(*(static_cast<DCint*>(pData)));
+			}
+			break;
+		case DC_SIGCHAR_UINT:{
+			return v8::Uint32::New(*(static_cast<DCuint*>(pData)));
+			}
+			break; 
+        case DC_SIGCHAR_LONG:{
+			return v8::Number::New(*(static_cast<DClong*>(pData)));
+			}
+			break;
+		case DC_SIGCHAR_ULONG:{
+			return v8::Number::New(*(static_cast<DCulong*>(pData)));
+			}
+			break;
+		case DC_SIGCHAR_LONGLONG:{
+			return v8::Number::New(static_cast<double>(*(static_cast<DClonglong*>(pData))));
+			}
+			break;
+		case DC_SIGCHAR_ULONGLONG:{
+			return v8::Number::New(static_cast<double>(*(static_cast<DCulonglong*>(pData))));
+			}
+			break;
+        case DC_SIGCHAR_FLOAT:{
+			return v8::Number::New(static_cast<double>(*(static_cast<DCfloat*>(pData))));
+			}
+			break;
+        case DC_SIGCHAR_DOUBLE:{
+			return v8::Number::New(static_cast<double>(*(static_cast<DCdouble*>(pData))));
+			}
+			break;
+		case DC_SIGCHAR_STRING:{
+			return WRAP_STRING(*(static_cast<const char**>(pData)));
+			}
+			break;
+        case DC_SIGCHAR_POINTER:{
+			return bridjs::Utils::wrapPointer(*(static_cast<DCpointer*>(pData)));
+			}
+			break;
+		case DC_SIGCHAR_STRUCT:{
+			return v8::Exception::TypeError(v8::String::New("Not implement"));
+		    }
+			break;
+		default:
+			std::stringstream message;
+			message<<"Unknown returnType: "<<type<<std::endl;
+
+			return v8::Exception::TypeError(v8::String::New(message.str().c_str()));
+		}
+}
+
+
 bridjs::ValueWrapper::~ValueWrapper(){
 	this->mValue.Dispose();
 	this->mValue.Clear();
 }
+
+
