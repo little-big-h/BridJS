@@ -7,7 +7,10 @@
 
 #define GET_CALL_ARG(args) \
 	GET_POINTER_ARG(DCCallVM,pVm,args,0)\
-	GET_POINTER_ARG(char,pFunction,args,1);
+	GET_POINTER_ARG(char,pFunction,args,1);\
+	if(pVm==NULL){ \
+		return v8::ThrowException(v8::String::New("DCCallVM was NULL"));\
+	}
 
 #define GET_INT32_ARG(name, args, index) \
  GET_INT32_VALUE(name, args[index], index)

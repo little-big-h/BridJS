@@ -66,8 +66,8 @@ v8::Handle<v8::Value> Pointer::New(const v8::Arguments& args){
 	  if(arg0->IsObject() && !arg0->IsString()){
 		  ptr = Utils::unwrapBufferToPointer(arg0);
 	  }else{
-		  GET_INT64_ARG(value, args, 0);
-		  ptr = (void*)value;
+		  GET_POINTER_ARG(void,value, args, 0);
+		  ptr = value;
 	  }
 	
 

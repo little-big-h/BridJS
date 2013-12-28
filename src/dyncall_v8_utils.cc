@@ -45,7 +45,6 @@ Handle<Value> bridjs::Utils::ptr2string(void* ptr) {
   return String::New(str);
 }
 */
-v8::Handle<v8::Value> GetTypeSize(const v8::Arguments& args);
 v8::Handle<v8::Value> WriteInt64(const v8::Arguments& args);
 
 size_t bridjs::Utils::getTypeSize(const char type){
@@ -159,7 +158,7 @@ v8::Handle<v8::Value> WriteInt64(const v8::Arguments& args){
 
 	(*(int64_t*)ptr) = value;
 
-	scope.Close(v8::Undefined());
+	return scope.Close(v8::Undefined());
 }
 
 void bridjs::Utils::Init(v8::Handle<v8::Object> utilsObj){

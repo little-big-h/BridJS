@@ -53,11 +53,17 @@ extern "C"{
 
 	double testStructFunction(const TestStruct *pTestStruct){
 
-		std::cout<<pTestStruct->e<<std::endl;
+		//std::cout<<pTestStruct->e<<std::endl;
 
 		return  pTestStruct->w* pTestStruct->x* pTestStruct->y* pTestStruct->z* pTestStruct->e;
 	}
 
+	double testStructValueFunction(const TestStruct testStruct){
+
+		//std::cout<<pTestStruct->e<<std::endl;
+
+		return  testStruct.w* testStruct.x* testStruct.y* testStruct.z* testStruct.e;
+	}
 
 typedef struct
 {
