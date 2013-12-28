@@ -40,4 +40,5 @@ typedef struct{
 	UV_EXTERN double testStructFunction(const TestStruct* pTestStruct);
 	UV_EXTERN void testCallbackFunction(MultiplyCallbackFunction callbackFunction);
 	UV_EXTERN void testAsyncCallbackFunction(MultiplyCallbackFunction callbackFunction);
+	UV_EXTERN double testStructValueFunction(const TestStruct testStruct);
 }

@@ -1,33 +1,18 @@
 var assert = require('assert'), bridjs = require('../lib/bridjs.js'), log4js = require("log4js"),
-        Utils = require("../lib/Utils.js"), my = require('myclass');
-var log = log4js.getLogger("bridjs_test");
-var libPath = process.cwd() + '/lib/bridjs/' + bridjs.platformTag + '/bridjs.node';
+        Utils = require("../lib/utils.js"), my = require('myclass');
+var log = log4js.getLogger("BridjsTest"), libPath;
 
 var interval = setInterval(function() {
     log.info("keep test alive");
 }, 999999999);
-//require('http').createServer().listen(8080);
-//var lib = bridjs.rawBindings.dl.loadLibrary(libPath);
+var lib;
+
 {/*Test dynload block*/
-    var lib = null;
-    //log.info("Test dynload: "+bridjs.Pointer);
-    //console.log(libPath); 
-    try {
-        var lib = bridjs.dl.loadLibrary(libPath);
-        //var testMultiplyFunction= bridjs.dl.findSymbol(lib, "testMultiplyFunction");
-        log.info("Lib: " + JSON.stringify(lib) + ", symbols: " + bridjs.symbols(libPath));
-        /*
-         assert(
-         symbols.length > 10,
-         "Didn't find expected symbols in " + libPath);*/
-        log.info("Test dynload pass");
-    } catch (e) {
-        log.error(e);
-    } finally {
-        if (lib) {
-            bridjs.dl.freeLibrary(lib);
-        }
-    }
+    libPath = __dirname + "/" + bridjs.LIBRARY_PATH + ".node";
+    lib = bridjs.dl.loadLibrary("libPath");
+
+    log.info("Lib: " + JSON.stringify(lib) + ", symbols: " + bridjs.symbols(libPath));
+    log.info("Test dynload pass");
 
 }
 {/*Test dyncall block*/
@@ -37,7 +22,7 @@ var interval = setInterval(function() {
             Signature = bridjs.dc.Signature, NativeFunction = bridjs.dc.NativeFunction, nativeFunction,
             startSeconds, CallbackObject, afterDyncallTest, afterDyncallbackTest, callbackHandler,
             i, iteration = 100000, dcbCallbackCount = 2, testStruct, testStructBuffer,
-            offset, os = require("os"), typeSize, testStructFunction, structObject;
+            offset, os = require("os"), typeSize, testStructFunction, structObject, testStructValueFunction;
     //console.log(libPath); 
 
     CallbackObject = my.Class({
@@ -67,7 +52,6 @@ var interval = setInterval(function() {
     });
 
     try {
-
         startSeconds = Utils.timeSeconds();
         for (i = 0; i < iteration; ++i) {
             ret = bridjs.test.testMultiplyFunction(2, 2, 2, 2, 2.5);
@@ -78,6 +62,8 @@ var interval = setInterval(function() {
         lib = bridjs.dl.loadLibrary(libPath);
         testMultiplyFunction = bridjs.dl.findSymbol(lib, "testMultiplyFunction");
         testStructFunction = bridjs.dl.findSymbol(lib, "testStructFunction");
+        testStructValueFunction = bridjs.dl.findSymbol(lib, "testStructValueFunction");
+
         vm = dyncall.newCallVM(4096);
         //log.info("vm pointer: "+JSON.stringify(vm));
         dyncall.mode(vm, bridjs.dc.CALL_C_DEFAULT);
@@ -115,8 +101,8 @@ var interval = setInterval(function() {
         nativeFunction.callAsync(vm, 2, 2, 2, 2, 2.5, new CallbackObject());
 
         if (testStructFunction) {
-            structObject = new bridjs.Struct(Signature.INT16_TYPE, Signature.INT32_TYPE,
-                Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE);
+            structObject = new bridjs.dyncall.Struct(Signature.INT16_TYPE, Signature.INT32_TYPE,
+                    Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE);
             testStruct = dyncall.newStruct(5, dyncall.DEFAULT_ALIGNMENT);
             dyncall.structField(testStruct, Signature.INT16_TYPE, dyncall.DEFAULT_ALIGNMENT, 1);
             dyncall.structField(testStruct, Signature.INT32_TYPE, dyncall.DEFAULT_ALIGNMENT, 1);
@@ -127,88 +113,42 @@ var interval = setInterval(function() {
 
 
             testStructBuffer = new Buffer(structObject.getSize());
-            /*
-            offset = 0;//bridjs.utils.getTypeSize(Signature.INT16_TYPE);
-            
-            if (os.endianness() === "BE") {
-                testStructBuffer.writeInt16BE(2, offset);
-            } else {
-                testStructBuffer.writeInt16LE(2, offset);
-            }*/
-            structObject.setField(0,2,testStructBuffer);
-            /*
-            offset += bridjs.utils.getTypeSize(Signature.INT32_TYPE);
-            if (os.endianness() === "BE") {
-                testStructBuffer.writeInt32BE(2, offset);
-            } else {
-                testStructBuffer.writeInt32LE(2, offset);
-            }*/
-            structObject.setField(1,2,testStructBuffer);
-            /*
-            typeSize = bridjs.utils.getTypeSize(Signature.LONG_TYPE);
-            offset += typeSize;
-            switch (typeSize) {
-                case bridjs.utils.getTypeSize(Signature.INT32_TYPE):
-                    if (os.endianness() === "BE") {
-                        testStructBuffer.writeInt32BE(2, offset);
-                    } else {
-                        testStructBuffer.writeInt32LE(2, offset);
-                    }
-                    break;
-                case bridjs.utils.getTypeSize(Signature.INT64_TYPE):
-                    bridjs.utils.writeInt64(testStructBuffer, offset,2);
-                    break;
 
-                default:
-                    throw "Unkonwn typeSize for long: " + typeSize;
-            }*/
-            structObject.setField(2,2,testStructBuffer);
-            /*
-            typeSize = bridjs.utils.getTypeSize(Signature.LONGLONG_TYPE);
-            offset += typeSize;
-             log.info(bridjs.utils.getTypeSize(Signature.INT64_TYPE));
-            switch (typeSize) {
-                case bridjs.utils.getTypeSize(Signature.INT32_TYPE):
-                    if (os.endianness() === "BE") {
-                        testStructBuffer.writeInt32BE(2, offset);
-                    } else {
-                        testStructBuffer.writeInt32LE(2, offset);
-                    }
-                    break;
-                case bridjs.utils.getTypeSize(Signature.INT64_TYPE):
-                   
-                    bridjs.utils.writeInt64(testStructBuffer, offset,2);
-                    break;
+            structObject.setField(0, 2, testStructBuffer);
+            structObject.setField(1, 2, testStructBuffer);
+            structObject.setField(2, 2, testStructBuffer);
+            structObject.setField(3, 2, testStructBuffer);
+            structObject.setField(4, 2.5, testStructBuffer);
 
-                default:
-                    throw "Unkonwn typeSize for long: " + typeSize;
-            }*/
-            structObject.setField(3,2,testStructBuffer);
-            /*
-            offset += bridjs.utils.getTypeSize(Signature.DOUBLE_TYPE);
-            if (os.endianness() === "BE") {
-                testStructBuffer.writeDoubleBE(2.5, offset);
-            } else {
-                testStructBuffer.writeDoubleLE(2.5, offset);
-            }*/
-            structObject.setField(4,2.5,testStructBuffer);
-            
-            assert(structObject.getField(3,testStructBuffer)===2,"Call Struct.getField fail");
+            assert(structObject.getField(3, testStructBuffer) === 2, "Call Struct.getField fail");
             startSeconds = Utils.timeSeconds();
-            log.info("Struct: "+bridjs.Struct);
             //for (i = 0; i < iteration; ++i) {
             dyncall.reset(vm);
             dyncall.argPointer(vm, testStructBuffer);
             ret = dyncall.callDouble(vm, testStructFunction);
-            log.info("testStructFunction: "+ret);
+            log.info("testStructFunction: " + ret);
             log.info("Spend " + ((Utils.timeSeconds() - startSeconds)) + " to invoke testStructFunction by dyncall");
             assert(ret === 40, "Call testStructFunction fail");
 
             dyncall.freeStruct(testStruct);
             testStruct = null;
-        }else{
+        } else {
             throw "Fail to locate testStructFunction from native lirary";
         }
+        /*
+         if( testStructValueFunction){
+         dyncall.reset(vm);
+         dyncall.argLongLong(vm, 8);
+         dyncall.argLongLong(vm, 8);
+         dyncall.argLongLong(vm, 8);
+         dyncall.argLongLong(vm, 8);
+         ret = dyncall.callDouble(vm, testStructValueFunction);
+         assert(ret === 40, "Call testStructValueFunction fail");
+         }else{
+         throw "Fail to locate testStructValueFunction from native lirary";
+         }*/
+
+
         /*
          assert(signature.getReturnType()===1, "Get return type fail");
          assert(signature.getArgumentsLength()===6, "Get arguments length fail");
@@ -272,7 +212,62 @@ var interval = setInterval(function() {
         if (lib) {
             bridjs.dl.freeLibrary(lib);
         }
-        
+
+        /*Test Prototype binding*/
+        {
+            log.info("Test prototype binding start");
+
+            var Tester = my.Class({
+                testMultiplyFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.INT16_TYPE, Signature.INT32_TYPE,
+                        Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE),
+                testStructFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE)
+            }), testerInstance, TestStruct, testStruct;
+
+            bridjs.register(Tester, libPath);
+
+
+
+            testerInstance = new Tester();
+            //log.info("Register Tester.testMultiplyFunctio: "+testerInstance.testMultiplyFunction);
+            startSeconds = Utils.timeSeconds();
+            for (i = 0; i < iteration; ++i) {
+                ret = testerInstance.testMultiplyFunction(2, 2, 2, 2, 2.5);
+            }
+            log.info("Spend " + ((Utils.timeSeconds() - startSeconds) / iteration) + " to invoke Tester.testStructFunction by prototype binding");
+            assert(ret === 40, "Call Tester.testMultiplyFunction fail");
+
+
+            bridjs.async(testerInstance).testMultiplyFunction(2, 2, 2, 2, 2.5, function(result) {
+                log.info(" bridjs.async(testerInstance).testMultiplyFunction results: " + result);
+            });
+            //log.info(bridjs.async(testerInstance));
+ 
+            TestStruct = my.Class(bridjs.Struct,{
+                constructor:function(){
+                    TestStruct.Super.call(this);
+                },
+                x : bridjs.structField(Signature.INT16_TYPE,0),
+                y : bridjs.structField(Signature.INT32_TYPE,1),
+                z : bridjs.structField(Signature.LONG_TYPE,2),
+                w : bridjs.structField(Signature.LONGLONG_TYPE,3),
+                e : bridjs.structField(Signature.DOUBLE_TYPE,4)
+            });
+            
+            testStruct = new TestStruct();
+            testStruct.x = testStruct.y = testStruct.z = testStruct.w = 2;
+            testStruct.e = 2.5;
+            assert(testStruct.x === 2, "Struct's get/set property fail");
+            
+            startSeconds = Utils.timeSeconds();
+            for (i = 0; i < iteration; ++i) {
+                ret = testerInstance.testStructFunction(testStruct.getPointer());
+            }
+            log.info("Spend " + ((Utils.timeSeconds() - startSeconds) / iteration) + " to invoke Tester.testStructFunction by prototype binding");
+            assert(ret === 40, "Call Tester.testStructFunction fail");
+            
+            //bridjs.unregister(Tester);
+            log.info("Test prototype binding pass");
+        }
         //clearInterval(interval);
     };
 

@@ -249,26 +249,39 @@ bridjs::NativeFunction* bridjs::NativeFunction::New(void *pSymbol, const char re
 v8::Handle<v8::Value> bridjs::NativeFunction::New(const v8::Arguments& args){
 	HandleScope scope;
 
-  if (args.IsConstructCall()) {
-	std::vector<const char> argumentTypes;
-	//GET_POINTER_ARG(DCCallVM,pVM,args,0);
-	GET_POINTER_ARG(DLSyms,pSymbol,args,0);
-	GET_CHAR_ARG(returnType,args,1); 
+	if (args.IsConstructCall()) {
+		NativeFunction* obj;
+		std::vector<const char> argumentTypes;
 
+		if(args[0]->IsArray()){
+			v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(args[0]);
 
-	for(int32_t i = 2;i<args.Length();++i){
-		GET_CHAR_ARG(type,args,i);
-		argumentTypes.push_back(type);
-	}
+			GET_POINTER_VALUE(DLSyms,pSymbol,array->Get(0),0);
+			GET_CHAR_VALUE(returnType,array->Get(1),1); 
 
-    NativeFunction* obj = new NativeFunction( pSymbol,returnType, argumentTypes);
-    obj->Wrap(args.This());
-    return args.This();
-  } else {
-    const int argc = 1;
-    Local<Value> argv[argc] = { args[0] };
-    return scope.Close(constructor->NewInstance(argc, argv));
-  }
+			for(int32_t i = 2;i<array->Length();++i){
+				GET_CHAR_VALUE(type,array->Get(i),i);;
+				argumentTypes.push_back(type);
+			}
+			obj = new NativeFunction( pSymbol,returnType, argumentTypes);
+		}else{
+			GET_POINTER_ARG(DLSyms,pSymbol,args,0);
+			GET_CHAR_ARG(returnType,args,1); 
+
+			for(int32_t i = 2;i<args.Length();++i){
+				GET_CHAR_ARG(type,args,i);
+				argumentTypes.push_back(type);
+			}
+			obj = new NativeFunction( pSymbol,returnType, argumentTypes);
+		}
+		obj->Wrap(args.This());
+
+		return args.This();
+	  } else {
+		const int argc = 1;
+		Local<Value> argv[argc] = { args[0] };
+		return scope.Close(constructor->NewInstance(argc, argv));
+	  }
 }
 /*
 v8::Handle<v8::Value> bridjs::Signature::NewInstance(const void* ptr){

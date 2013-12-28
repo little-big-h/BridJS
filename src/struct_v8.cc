@@ -257,14 +257,20 @@ v8::Handle<v8::Value> bridjs::Struct::New(const v8::Arguments& args){
   if (args.IsConstructCall()) {
 	  try{
 		std::vector<const char> argumentTypes;
-		//std::shared_ptr<node::Buffer> buffer;
 		size_t alignment = 8;
 
-		//size_t size = sizeof(TestStruct);
+		if(args[0]->IsArray()){
+			v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(args[0]);
 
-		for(int32_t i = 0;i<args.Length();++i){
-			GET_CHAR_ARG(type,args,i);
-			argumentTypes.push_back(type);
+			for(int32_t i = 0;i<array->Length();++i){
+				GET_CHAR_VALUE(type,array->Get(i),i);;
+				argumentTypes.push_back(type);
+			}
+		}else{
+			for(int32_t i = 0;i<args.Length();++i){
+				GET_CHAR_ARG(type,args,i);
+				argumentTypes.push_back(type);
+			}
 		}
 		//buffer = std::shared_ptr<node::Buffer>(node::Buffer::New(getFieldsSize(argumentTypes,alignment)));
 		Struct* obj = new Struct(argumentTypes, alignment);

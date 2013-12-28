@@ -16,7 +16,7 @@ using namespace bridjs;
 Handle<Value> Dyncall::newCallVM(const v8::Arguments& args) {
   HandleScope scope;
   GET_INT64_ARG(size, args, 0);
-  DCCallVM *vm = dcNewCallVM((int)size);
+  DCCallVM *vm = dcNewCallVM(static_cast<DCsize>(size));
 
   //std::cout<<(void*)vm<<std::endl;
 
