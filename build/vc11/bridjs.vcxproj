@@ -50,11 +50,11 @@
     <TargetPath>$(OutDir)\$(ProjectName).node</TargetPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>..\..\deps\dyncall-0.7\win64;C:\Users\家漢\.node-gyp\0.10.22\x64;C:\Users\JiaHan_Su\.node-gyp\0.10.22\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\..\deps\dyncall-0.7\win64;$(LibraryPath)</LibraryPath>
     <IncludePath>..\..\deps\dyncall-0.7\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>..\..\deps\dyncall-0.7\win64;C:\Users\家漢\.node-gyp\0.10.22\x64;C:\Users\JiaHan_Su\.node-gyp\0.10.22\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\..\deps\dyncall-0.7\win64;$(LibraryPath)</LibraryPath>
     <IncludePath>..\..\deps\dyncall-0.7\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -143,7 +143,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\binding.gyp" />
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>

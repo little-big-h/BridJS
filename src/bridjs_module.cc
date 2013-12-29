@@ -55,6 +55,10 @@ void init(Handle<Object> target) {
   Local<Object> testObj = Object::New();
   char signedType = DC_SIGCHAR_VOID, unsignedType = DC_SIGCHAR_VOID;
 
+#ifdef _DEBUG
+  std::cerr<<"bridjs::init(), Warning, It is debug version"<<std::endl;
+#endif
+
   /*dynload*/
   target->Set(String::NewSymbol("dl"), dynloadObj);
   bridjs::Dynload::Init(dynloadObj);
