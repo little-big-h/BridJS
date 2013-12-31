@@ -6,4 +6,10 @@
     <LocalDebuggerWorkingDirectory>C:\Users\家漢\Dropbox\works\BridJS</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommand>C:\Program Files %28x86%29\nodejs\node.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>test\bridjs_test.js</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>C:\Users\家漢\Dropbox\works\BridJS</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
 </Project>

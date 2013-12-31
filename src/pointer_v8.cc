@@ -15,26 +15,37 @@ void Pointer::Init(v8::Handle<v8::Object> exports){
 	// Prepare constructor template
 	  Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
 	  tpl->SetClassName(String::NewSymbol("Pointer"));
-	  tpl->InstanceTemplate()->SetInternalFieldCount(3);
+	  tpl->InstanceTemplate()->SetInternalFieldCount(4);
 	  // Prototype
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("getAddress"),
 		  FunctionTemplate::New(GetAddress)->GetFunction());
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("isNull"),
 		  FunctionTemplate::New(IsNull)->GetFunction());
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("toString"),
-		  FunctionTemplate::New(ToString)->GetFunction());
+		  FunctionTemplate::New(Pointer::ToString)->GetFunction());
+	  tpl->PrototypeTemplate()->Set(String::NewSymbol("slice"),
+		  FunctionTemplate::New(Pointer::Slice)->GetFunction());
 	  constructor = Persistent<Function>::New(tpl->GetFunction());
 	  exports->Set(String::NewSymbol("Pointer"), constructor);
 }
 
-v8::Handle<v8::Value> ToString(const v8::Arguments& args){
+v8::Handle<v8::Value> Pointer::ToString(const v8::Arguments& args){
 	HandleScope scope;
 	Pointer* obj = ObjectWrap::Unwrap<Pointer>(args.This());
 	std::stringstream ptrStream;
 
-	ptrStream<<"Pointer: "<<std::hex<<obj->getAddress()<<std::endl;
+	ptrStream<<"< Pointer: "<<std::hex<<obj->getAddress()<<" >"<<std::endl;
 
 	return scope.Close(String::New((ptrStream.str().c_str())));
+}
+
+v8::Handle<v8::Value> Pointer::Slice(const v8::Arguments& args){
+	HandleScope scope;
+	Pointer* obj = ObjectWrap::Unwrap<Pointer>(args.This());
+
+	GET_INT64_ARG(start, args, 0);
+
+	return Pointer::NewInstance(static_cast<const char*>(obj->getAddress())+start);
 }
 
 Pointer::Pointer(const void* ptr){
@@ -47,7 +58,7 @@ void* Pointer::getAddress(){
 
 const void* Pointer::Data(v8::Handle<v8::Object> val){
 	HandleScope scope;
-	Pointer* obj = ObjectWrap::Unwrap<Pointer>(val);
+	Pointer* obj = Pointer::Unwrap<Pointer>(val);
 
 
 	return obj->getAddress();

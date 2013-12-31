@@ -65,52 +65,11 @@ extern "C"{
 		return  testStruct.w* testStruct.x* testStruct.y* testStruct.z* testStruct.e;
 	}
 
-typedef struct
-{
-	char a, b, c;
-} FewValues;
-
-double sum_FewValues(FewValues values)
-{
-	printf("sum_FewValues(a = %d, b = %d, c = %d)\n", (int)values.a, (int)values.b, (int)values.c);
-	return ((double)values.a) + ((double)values.b) + ((double)values.c);
-}
-
-void bridjs::Test::test(){
-	DCCallVM* pc = dcNewCallVM(4096);
-	{
-		FewValues values;
-		double calledSum, expectedSum;
-		DCstruct* s = dcNewStruct(3, DEFAULT_ALIGNMENT);
-		dcStructField(s, DC_SIGCHAR_CHAR, DEFAULT_ALIGNMENT, 1);
-		dcStructField(s, DC_SIGCHAR_CHAR, DEFAULT_ALIGNMENT, 1);
-		dcStructField(s, DC_SIGCHAR_CHAR, DEFAULT_ALIGNMENT, 1);
-		dcCloseStruct(s);
-
-		//DC_TEST_STRUCT_SIZE(FewValues, s);
-
-		values.a = 1;
-		values.b = 2;
-		values.c = 3;
-
-		dcMode(pc, DC_CALL_C_X64_WIN64);
-		dcReset(pc);
-		printf("BEFORE dcArgStruct\n");
-		dcArgChar(pc, 1);
-		dcArgChar(pc, 2);
-		dcArgChar(pc, 3);
-		//dcArgStruct(pc, s, &values);
-		printf("AFTER dcArgStruct\n");
-		calledSum = dcCallDouble(pc, (DCpointer)&sum_FewValues);
-		expectedSum = sum_FewValues(values);
-
-		//DC_TEST_INT_EQUAL(expectedSum, calledSum);
-		dcFreeStruct(s);
+	double testComplexStructFunction(const TestComplexStruct* pTestStruct){
+		return  pTestStruct->w*pTestStruct->x*pTestStruct->y*pTestStruct->z*pTestStruct->point2d.x*pTestStruct->point3d.y*pTestStruct->subStruct.e;
 	}
-	
 
-	dcFree(pc);
-
-}
-
+	double testArrayStructFunction(const TestArrayStruct* pTestStruct){
+		return pTestStruct->w*pTestStruct->first[1]*pTestStruct->second[2];
+	}
 }

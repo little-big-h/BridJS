@@ -11,6 +11,45 @@ extern "C"{
 }
 
 namespace bridjs{
+class ValueCollection{
+public :
+	virtual v8::Local<v8::Value> get(const uint32_t i) const{
+		throw std::runtime_error("Not implement");
+	};
+	virtual uint32_t length() const {throw std::runtime_error("Not implement");};
+	virtual ~ValueCollection(){};
+};
+
+class ArgumentCollection: public ValueCollection{
+private:
+	const v8::Arguments* mpArgs;
+public : 
+	ArgumentCollection(const v8::Arguments* pArg);
+	v8::Local<v8::Value> get(const uint32_t i) const;
+	uint32_t length() const;
+	~ArgumentCollection();
+};
+
+class ArrayCollection: public ValueCollection{
+private:
+	const v8::Handle<v8::Array> mArray;
+public : 
+	ArrayCollection(const v8::Handle<v8::Array> arr);
+	v8::Local<v8::Value> get(const uint32_t i) const;
+	uint32_t length() const;
+	~ArrayCollection();
+};
+
+class ObjectCollection: public ValueCollection{
+private:
+	const v8::Handle<v8::Object> mObject;
+public : 
+	ObjectCollection(const v8::Handle<v8::Object> arr);
+	v8::Local<v8::Value> get(const uint32_t i) const;
+	uint32_t length() const;
+	~ObjectCollection();
+};
+
 class NativeFunction :public node::ObjectWrap{
 public:
 	static void Init(v8::Handle<v8::Object> exports);

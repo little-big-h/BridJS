@@ -12,6 +12,8 @@ public:
 	static v8::Handle<v8::Value> GetAddress(const v8::Arguments& args);
 	static v8::Handle<v8::Value> IsNull(const v8::Arguments& args);
 	static const void* Data(v8::Handle<v8::Object> val);
+	static v8::Handle<v8::Value> Slice(const v8::Arguments& args);
+	static v8::Handle<v8::Value> ToString(const v8::Arguments& args);
 
 	virtual void* getAddress();
 	virtual ~Pointer();

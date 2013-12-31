@@ -149,6 +149,22 @@ v8::Handle<v8::Value> SetField(const v8::Arguments& args){
 	}
  }
 
+  v8::Handle<v8::Value> GetSignature(const v8::Arguments& args){
+	HandleScope scope;
+	bridjs::Struct* obj = ObjectWrap::Unwrap<bridjs::Struct>(args.This());
+
+
+	return  scope.Close(WRAP_STRING(obj->getSignature().c_str()));
+ }
+
+v8::Handle<v8::Value> bridjs::Struct::ToString(const v8::Arguments& args){
+	HandleScope scope;
+	bridjs::Struct* obj = ObjectWrap::Unwrap<bridjs::Struct>(args.This());
+
+
+	return  scope.Close(WRAP_STRING(obj->toString().c_str()));
+ }
+
  size_t getAlignSize(size_t size, size_t alignment)
 {
 	size_t mod = (size) % alignment;
@@ -172,7 +188,7 @@ size_t getFieldsSize(const std::vector<const char> &fieldTypes, const size_t ali
 	return size;
 }
 
-size_t getAlignmentSize(const char type, const bool isFirst){
+size_t getAlignmentSize(const char type,const size_t typeSize, const bool isFirst){
 
 				/*
 	 if (actualAlignType == ALIGN_NONE) {
@@ -192,7 +208,7 @@ size_t getAlignmentSize(const char type, const bool isFirst){
             }
         }
         return alignment;*/
-	size_t typeSize = bridjs::Utils::getTypeSize(type);
+
 	#ifdef _MSC_VER
 		return std::min(static_cast<const size_t>(8), typeSize);
 	#elif
@@ -225,7 +241,7 @@ void bridjs::Struct::Init(v8::Handle<v8::Object> exports){
 	 
 
 	  tpl->SetClassName(String::NewSymbol("Struct"));
-	  tpl->InstanceTemplate()->SetInternalFieldCount(5);
+	  tpl->InstanceTemplate()->SetInternalFieldCount(8);
 	  // Prototype
 	  /*
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("getVM"),
@@ -234,12 +250,18 @@ void bridjs::Struct::Init(v8::Handle<v8::Object> exports){
 		  FunctionTemplate::New(GetFieldType)->GetFunction(), ReadOnly);
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("getFieldCount"),
 		  FunctionTemplate::New(GetFieldCount)->GetFunction(), ReadOnly);
+	  tpl->PrototypeTemplate()->Set(String::NewSymbol("getFieldOffset"),
+		  FunctionTemplate::New(GetFieldOffset)->GetFunction(), ReadOnly);
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("getField"),
 		  FunctionTemplate::New(GetField)->GetFunction(), ReadOnly);
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("setField"),
 		  FunctionTemplate::New(SetField)->GetFunction(), ReadOnly);
 	  tpl->PrototypeTemplate()->Set(String::NewSymbol("getSize"),
 		  FunctionTemplate::New(GetSize)->GetFunction(), ReadOnly);
+	  tpl->PrototypeTemplate()->Set(String::NewSymbol("getSignature"),
+		  FunctionTemplate::New(GetSignature)->GetFunction(), ReadOnly);
+	  tpl->PrototypeTemplate()->Set(String::NewSymbol("toString"),
+		  FunctionTemplate::New(bridjs::Struct::ToString)->GetFunction(), ReadOnly);
 
 	  constructor = Persistent<Function>::New(tpl->GetFunction());
 
@@ -247,8 +269,8 @@ void bridjs::Struct::Init(v8::Handle<v8::Object> exports){
 }
 
 
-bridjs::Struct* bridjs::Struct::New(const std::vector<const char> &fieldTypes){
-	return new bridjs::Struct(fieldTypes, DEFAULT_ALIGNMENT);
+bridjs::Struct* bridjs::Struct::New(const std::vector<const char> &fieldTypes,std::map<uint32_t,v8::Local<v8::Object>> &subStructMap){
+	return new bridjs::Struct(fieldTypes,subStructMap, DEFAULT_ALIGNMENT);
 }
 
 v8::Handle<v8::Value> bridjs::Struct::New(const v8::Arguments& args){
@@ -257,23 +279,46 @@ v8::Handle<v8::Value> bridjs::Struct::New(const v8::Arguments& args){
   if (args.IsConstructCall()) {
 	  try{
 		std::vector<const char> argumentTypes;
-		size_t alignment = 8;
+		size_t alignment = DEFAULT_ALIGNMENT;
+		std::map<uint32_t,v8::Local<v8::Object>> subStructMap;
+		v8::Local<v8::Value> value;
+		char type;
+		Struct* obj;
 
 		if(args[0]->IsArray()){
 			v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(args[0]);
 
-			for(int32_t i = 0;i<array->Length();++i){
-				GET_CHAR_VALUE(type,array->Get(i),i);;
+			for(uint32_t i = 0;i<array->Length();++i){
+				value = array->Get(i);
+
+				if(value->IsObject() && !value->IsString()){
+					type = DC_SIGCHAR_STRUCT;
+					subStructMap[i] = value->ToObject();
+				}else{
+					GET_CHAR_VALUE(tempType,value,i);
+					type = tempType;
+				}
+
 				argumentTypes.push_back(type);
 			}
 		}else{
 			for(int32_t i = 0;i<args.Length();++i){
-				GET_CHAR_ARG(type,args,i);
+				value = args[i];
+
+				if(value->IsObject() && !value->IsString()){
+					type = DC_SIGCHAR_STRUCT;
+					subStructMap[i] = value->ToObject();
+				}else{
+					GET_CHAR_VALUE(tempType,value,i);
+					type = tempType;
+				}
 				argumentTypes.push_back(type);
 			}
 		}
+
+		
 		//buffer = std::shared_ptr<node::Buffer>(node::Buffer::New(getFieldsSize(argumentTypes,alignment)));
-		Struct* obj = new Struct(argumentTypes, alignment);
+		obj = new Struct(argumentTypes, subStructMap, alignment);
 		obj->Wrap(args.This());
 		return args.This();
 	  }catch(std::exception &e){
@@ -311,6 +356,20 @@ v8::Handle<v8::Value> bridjs::Struct::GetFieldType(const v8::Arguments& args){
 	return value;
 }
 
+v8::Handle<v8::Value> bridjs::Struct::GetFieldOffset(const v8::Arguments& args){
+	HandleScope scope;
+	bridjs::Struct* obj = ObjectWrap::Unwrap<bridjs::Struct>(args.This());
+	v8::Handle<v8::Value> value;
+	GET_INT32_ARG(index,args,0);
+
+	try{
+		value =  scope.Close(WRAP_UINT(obj->getFieldOffset(index)));
+	}catch(std::out_of_range& e){
+		value = THROW_EXCEPTION(e.what());
+	}
+
+	return value;
+}
 
 v8::Handle<v8::Value> bridjs::Struct::GetFieldCount(const v8::Arguments& args){
 	HandleScope scope;
@@ -319,38 +378,36 @@ v8::Handle<v8::Value> bridjs::Struct::GetFieldCount(const v8::Arguments& args){
 	return scope.Close(v8::Int32::New(static_cast<int32_t>(obj->getFieldCount())));
 }
 
-bridjs::Struct::Struct(const std::vector<const char> &fieldTypes,const size_t alignment):mFieldTypes(fieldTypes){
-	/*size_t offset = 0, typeSize, previousTypeSize = 0;
-	this->mFieldTypes.shrink_to_fit();
-	this->mOffsets.push_back(0);
-	this->mOffsets.push_back(4);
-	this->mOffsets.push_back(8);
-	this->mOffsets.push_back(16);
-	this->mOffsets.push_back(24);
+bridjs::Struct::Struct(const std::vector<const char> &fieldTypes, 
+					   std::map<uint32_t,v8::Local<v8::Object>> &subStructMap,
+					   const size_t alignment):mFieldTypes(fieldTypes){
 	
-	for(uint32_t i=0;i<this->mFieldTypes.size();++i){
-		this->mOffsets.push_back(offset);
-		typeSize = bridjs::Utils::getTypeSize(this->mFieldTypes[i]);//getAlignSize(,alignment);
+	for(std::map<uint32_t,v8::Local<v8::Object>>::iterator it=subStructMap.begin(); 
+		it!=subStructMap.end() ; ++it){
+			this->mSubStructMap[it->first] = v8::Persistent<v8::Object>::New(it->second);
+	}
 
-		offset+=typeSize;
-	}*/
-
-	this->mOffsets.shrink_to_fit();
 	mSize = this->deriveLayout(alignment);
-	/*
-	this->mBuffer = std::shared_ptr<char>(new char[32],ArrayDeleter<char>());
-	this->mPtr = this->mBuffer.get();*/
 }
 
 const size_t bridjs::Struct::deriveLayout(const size_t alignment){
 	size_t calculatedSize = 0;
 	char type;
 	size_t typeSize, fieldAlignment, alignmentInfo = alignment;
+	Struct* pSubStruct = NULL;
 
 	for(uint32_t i=0;i<this->mFieldTypes.size();++i){
-		type =  this->mFieldTypes[i];   
-		typeSize =  bridjs::Utils::getTypeSize(type);
-		fieldAlignment = getAlignmentSize(type, i<=0);
+		type =  this->mFieldTypes[i];
+		if(type==DC_SIGCHAR_STRUCT){
+			pSubStruct =  this->getSubStruct(i);
+			typeSize = pSubStruct->getSize();
+			/*Struct's aligment is computed from its max size element*/
+			fieldAlignment = pSubStruct->getAlignment();
+		}else{
+			fieldAlignment = typeSize =  bridjs::Utils::getTypeSize(type);
+		}
+		
+		fieldAlignment = getAlignmentSize(type,fieldAlignment, i<=0);
 
             // Align fields as appropriate
         if (fieldAlignment == 0) {
@@ -360,6 +417,8 @@ const size_t bridjs::Struct::deriveLayout(const size_t alignment){
 
 			throw std::runtime_error(message.str());
          }
+
+
          alignmentInfo= std::max(alignmentInfo, fieldAlignment);
 
          if ((calculatedSize % fieldAlignment) != 0) {
@@ -385,6 +444,8 @@ const size_t bridjs::Struct::deriveLayout(const size_t alignment){
 	if (calculatedSize > 0) {
 		calculatedSize = addPadding(calculatedSize, alignmentInfo);
     }
+
+	this->mAligment = alignmentInfo;
 
 	return calculatedSize;
 }
@@ -414,6 +475,21 @@ void bridjs::Struct::checkRange(const uint32_t index) const{
 		throw std::out_of_range(message.str().c_str()); 
 	}
 }
+
+Struct* bridjs::Struct::getSubStruct(uint32_t index){
+	HandleScope scope;
+	//v8::Handle<v8::Object> structInstance =this->mSubStructMap[index];
+	Struct* pSubStruct = Struct::Unwrap<Struct>(this->mSubStructMap[index]);
+	
+	if(pSubStruct!=NULL){
+		return pSubStruct;
+	}else{
+		std::stringstream message;
+		message<<"Fail to cast sub Struct object, field index = "<<index;
+		throw std::runtime_error(message.str());
+	}
+}
+
 
 std::shared_ptr<void> bridjs::Struct::getField(const uint32_t index, const void* mPtr) const{
 	this->checkRange(index);
@@ -482,8 +558,9 @@ std::shared_ptr<void> bridjs::Struct::getField(const uint32_t index, const void*
 			}
 			break;
 		case DC_SIGCHAR_STRUCT:{
-			std::cerr<<"Not implement"<<std::endl;
-			data = std::shared_ptr<void*>(NULL);
+			std::stringstream message;
+			message<<"bridjs should handle Struct type at JavaScript layer: "<<index;
+			throw std::runtime_error(message.str());
 		    }
 			break;
         case DC_SIGCHAR_VOID:
@@ -562,8 +639,9 @@ void bridjs::Struct::setField(const uint32_t index, std::shared_ptr<void> pValue
 			}
 			break;
 		case DC_SIGCHAR_STRUCT:{
-			std::cerr<<"Not implement"<<std::endl;
-			//*(DCpointer*)ptr  = std::shared_ptr<void*>(NULL);
+			std::stringstream message;
+			message<<"bridjs should handle Struct type at JavaScript layer: "<<index;
+			throw std::runtime_error(message.str());
 		    }
 			break;
         case DC_SIGCHAR_VOID:
@@ -575,6 +653,48 @@ void bridjs::Struct::setField(const uint32_t index, std::shared_ptr<void> pValue
 		}
 }
 
+std::string bridjs::Struct::getSignature(){
+	char type;
+	Struct* pSubStruct = NULL;
+	std::stringstream sig;
+
+	for(uint32_t i=0;i<this->mFieldTypes.size();++i){
+		type = this->mFieldTypes[i];
+		
+		if(type==DC_SIGCHAR_STRUCT){
+			sig<<getSubStruct(i)->toString();
+		}else{
+			sig<<type;
+		}
+	}
+
+	return sig.str();
+}
+
+size_t bridjs::Struct::getFieldOffset(uint32_t index) const{
+	this->checkRange(index);
+
+	return this->mOffsets[index];
+}
+
+std::string bridjs::Struct::toString(){
+	std::stringstream sig;
+
+	sig<<DC_SIGCHAR_STRUCT<<'('<<this->getSignature()<<')';
+
+	return sig.str();
+};
+
+size_t bridjs::Struct::getAlignment() const{
+	return this->mAligment;
+}
+
 bridjs::Struct::~Struct(){
-	
+
+	for(std::map<uint32_t,v8::Persistent<v8::Object>>::iterator it=this->mSubStructMap.begin(); 
+		it!=this->mSubStructMap.end() ; ++it){
+
+		it->second.Dispose();
+		it->second.Clear();
+	}
 }

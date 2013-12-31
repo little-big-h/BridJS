@@ -1,0 +1,50 @@
+{
+    "name": "bridjs",
+    "version": "0.1",
+    "description": "V8 bindings for dyncall, and BridJ-like API for nodejs.",
+    "keywords": [
+        "dyncall",
+        "ffi",
+        "native binding"
+    ],
+    "main": "./lib/bridjs",
+    "author": {
+        "name": "Jia-Han Su",
+        "email": "jiahan.su@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jiahansu/BridJS.git"
+    },
+    "bugs": {
+        "url": "https://github.com/jiahansu/BridJS/issues"
+    },
+    "engines": {
+        "node": ">=0.10.22"
+    },
+    "scripts": {
+        "test": "vows"
+    },
+    "directories": {
+        "win32_x64": "win32_x64",
+        "wind32_x86": "win32_x86",
+        "test": "test",
+        "lib": "lib"
+    },
+    "dependencies": {
+        "myclass": ">=1.0.2",
+        "log4js": ">=0.6.9"
+    },
+    "devDependencies": {
+        "myclass": ">=1.0.2",
+        "log4js": ">=0.6.9"
+    },
+    "browser": {
+        "os": false
+    },
+    "readme": "V8 bindings for dyncall, and BridJ-like API for nodejs.",
+    "readmeFilename": "README.md",
+    "homepage": "https://github.com/jiahansu/BridJS/",
+    "_id": "bridjs@0.1",
+    "_from": "bridjs@"
+}

@@ -204,7 +204,14 @@
 	  v8::String::Utf8Value str(name ## Value); \
 	  name = (type*)(*name ## Value); \
   }else if (name ## Value->IsObject() || name ## Value->IsNull()) { \
-    name = (type*)bridjs::Utils::unwrapPointer(name ## Value); \
+	  try{ \
+		name = (type*)bridjs::Utils::unwrapPointer(name ## Value); \
+	  }catch(std::exception &e){ \
+		std::stringstream message; \
+		v8::String::Utf8Value valueStr(value); \
+		message<< "Invalid object for pointer argument " #name " at index ="<<index<<", value = "<<(*valueStr)<<": "<<e.what(); \
+		return v8::ThrowException(v8::String::New(message.str().c_str())); \
+	  } \
   }else{ \
 	std::stringstream message; \
 	v8::String::Utf8Value valueStr(value); \

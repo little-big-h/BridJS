@@ -3,7 +3,6 @@ node_modules
 build/netbeans
 dyncall
 *~
-.gitignore
 .DS_Store
 non_committable_experiments
 netbeans

@@ -125,7 +125,7 @@ size_t bridjs::Utils::getTypeSize(const char type){
 			std::stringstream message;
 			message<<"Unknown type: "<<type<<std::endl;
 			//throw std::runtime_error(message.str());
-			throw std::exception(message.str().c_str());
+			throw std::runtime_error(message.str().c_str());
 		}
 	
 		return size;
@@ -221,8 +221,16 @@ const void* bridjs::Utils::unwrapPointer(v8::Local<v8::Value> value){
 		ptr = NULL;
 	}else if(node::Buffer::HasInstance(value)){
 		ptr = node::Buffer::Data(value);
+	}else if(value->IsObject()){
+		v8::Local<v8::Object> object = value->ToObject();
+		
+		if(object->InternalFieldCount()>0){
+			ptr = bridjs::Pointer::Data(object);
+		}else{
+			throw std::runtime_error("Invalid bridjs::Pointer object");
+		}
 	}else{
-		ptr = bridjs::Pointer::Data(value->ToObject());
+		throw std::runtime_error("Unknown JavaScript value for pointer type");
 	}
 
 	return ptr;
