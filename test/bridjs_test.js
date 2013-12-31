@@ -204,9 +204,10 @@ var lib;
                         Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE),
                 testStructFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testComplexStructFunction :  bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
-                testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE)
+                testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
+                testAsyncCallbackFunction : bridjs.defineFunction(Signature.VOID_TYPE, Signature.POINTER_TYPE)
             }), testerInstance, TestStruct, testStruct, TestComplexStruct, Point2d,Point3d, 
-                testComplexStruct, point3d, TestArrayStruct, testArrayStruct;
+                testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback;
 
             bridjs.register(Tester, libPath);
 
@@ -225,6 +226,13 @@ var lib;
             bridjs.async(testerInstance).testMultiplyFunction(2, 2, 2, 2, 2.5, function(result) {
                 log.info(" bridjs.async(testerInstance).testMultiplyFunction results: " + result);
             });
+            
+            callback = bridjs.newCallback(bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.INT16_TYPE, Signature.INT32_TYPE,
+            Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE), function(w, x, y, z, e) {
+                return w * x * y * z * e;
+            });
+            testerInstance.testAsyncCallbackFunction(callback);
+            
             //log.info(bridjs.async(testerInstance));
  
             TestStruct = bridjs.defineStruct({
