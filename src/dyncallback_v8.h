@@ -30,13 +30,16 @@ namespace bridjs {
 	    DCArgs* mpDCArgs; 
 		DCValue* mpDCresult;
 		uv_cond_t mCond;
-		uv_async_t mAsync;
+		//uv_async_t mAsync;
 	public:
 		CallbackTask(CallbackWrapper *pCallbackWrapper, DCCallback *pDCCallBack, DCArgs *pDCArgs, DCValue* pDCresult);
 		void wait();
 		void notify();
 		void done();
-		uv_async_t* getAsync();
+		//uv_async_t* getAsync();
+
+		static void flushV8Callbacks(uv_async_t *handle, int status /*UNUSED*/);
+
 		virtual ~CallbackTask();
 	};
 	

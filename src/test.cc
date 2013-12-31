@@ -10,7 +10,7 @@ void bridjs::Test::asyncTestCallback(uv_work_t *req){
 	MultiplyCallbackFunction func = static_cast<MultiplyCallbackFunction>(req->data);
 	//std::cout<<"Got it"<<std::endl;
 	if(func !=NULL){
-		std::cout<<"testCallbackFunction: "<<func(2,2,2,2,2.5)<<std::endl;
+		std::cout<<"testAsyncCallbackFunction: "<<func(2,2,2,2,2.5)<<std::endl;
 	}else{
 		std::cerr<<"Fail to cast data pointer to MultiplyCallbackFunction"<<std::endl;
 	}

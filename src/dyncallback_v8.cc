@@ -12,6 +12,10 @@ std::map<DCCallback*, CallbackWrapper*> gValueWrapperMap;
 uv_mutex_t gValueWrapperMutex;
 unsigned long gDefaultThread;
 
+uv_mutex_t gCallbackTaskQueueMutex;
+uv_async_t gCallbackQueueAsync;
+std::vector<std::shared_ptr<bridjs::CallbackTask>> gCallbackTaskQueue;
+
 char callbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, void* userdata);
 
 v8::Handle<v8::Value> NewCallback(const v8::Arguments& args);
@@ -43,12 +47,25 @@ void bridjs::Dyncallback::Init(v8::Handle<v8::Object> exports){
 	error = uv_mutex_init(&gValueWrapperMutex);
 
 	if(error!=0){
-		char* message = "Fail to init gLoadLubraryMutex";
+		char* message = "Fail to init gValueWrapperMutex";
 		std::cerr<<message<<std::endl;
 
 		throw std::runtime_error(message);
 	}
 
+	memset(&gCallbackTaskQueueMutex,0, sizeof(uv_mutex_t));
+	error = uv_mutex_init(&gCallbackTaskQueueMutex);
+
+	if(error!=0){
+		char* message = "Fail to init gCallbackTaskQueueMutex";
+		std::cerr<<message<<std::endl;
+
+		throw std::runtime_error(message);
+	}
+
+	memset(&gCallbackQueueAsync,0,sizeof(uv_async_t));
+
+	uv_async_init(uv_default_loop(),&gCallbackQueueAsync,bridjs::CallbackTask::flushV8Callbacks);
 
 	NODE_SET_METHOD(exports,"newCallback", NewCallback);
 	NODE_SET_METHOD(exports,"initCallback", InitCallback);
@@ -446,6 +463,32 @@ void invokeV8Callback(uv_async_t *handle, int status /*UNUSED*/) {
 	}
 }
 
+void bridjs::CallbackTask::flushV8Callbacks(uv_async_t *handle, int status /*UNUSED*/){
+	std::shared_ptr<CallbackTask> pCallbackTask;
+	std::vector<std::shared_ptr<CallbackTask>>::iterator iterator;
+	do{
+		pCallbackTask = NULL;
+		uv_mutex_lock(&gCallbackTaskQueueMutex);
+		try{
+			if(!gCallbackTaskQueue.empty()){
+				iterator = gCallbackTaskQueue.begin();
+				pCallbackTask = *iterator;
+				gCallbackTaskQueue.erase(iterator);
+			}
+		}catch(...){
+			std::cerr<<"Unknown error to call gCallbackTaskQueue.pop_back()"<<std::endl;
+		}
+		uv_mutex_unlock(&gCallbackTaskQueueMutex);
+
+		if(pCallbackTask!=NULL){
+			pCallbackTask->done();
+		}else{
+			break;
+		}
+
+	}while(true);
+}
+
 void closeAsyncCallback(uv_handle_t *handle) {
 	CallbackTask *pCallTask = static_cast<CallbackTask*>(handle->data);
 	
@@ -478,29 +521,38 @@ const char bridjs::CallbackWrapper::onCallback(DCCallback* cb, DCArgs* args, DCV
 	try{
 		uv_mutex_lock(&mMutex);
 
-		CallbackTask *task = new CallbackTask(this,cb,args,result);
-		uv_work_t *req = new uv_work_t;
+		std::shared_ptr<CallbackTask> task(new CallbackTask(this,cb,args,result));
+		//uv_work_t *req = new uv_work_t;
 
-		req->data = task;
+		//req->data = task;
 
-		
+		uv_mutex_lock(&gCallbackTaskQueueMutex);
+		try{
+			gCallbackTaskQueue.push_back(task);
+		}catch(...){
+			std::cerr<<"Unknown error to call gCallbackTaskQueue.push_back()"<<std::endl;
+		}
+		uv_mutex_unlock(&gCallbackTaskQueueMutex);
+
 		if(uv_thread_self()==gDefaultThread){
-			invokeV8Callback(task->getAsync(),0);
+			bridjs::CallbackTask::flushV8Callbacks(NULL,0);
+			//invokeV8Callback(task->getAsync(),0);
 		}else{
 			//uv_queue_work(uv_default_loop(),req,NULL,(uv_after_work_cb)invokeV8Callback);
-			uv_async_send(task->getAsync());
+
+			uv_async_send(&gCallbackQueueAsync);
 			//std::cout<<"1111111111111"<<std::endl;	
 			task->wait();
 			//std::cout<<"2222222222222"<<std::endl;	
 		}
 		
 
-		req->data = NULL;
-		delete req;
+		//req->data = NULL;
+		//delete req;
 		/*Delete pTask object after close async object*/
-		uv_close((uv_handle_t*) task->getAsync(),closeAsyncCallback);
-		req = NULL;
-		task = NULL;
+		//uv_close((uv_handle_t*) task->getAsync(),closeAsyncCallback);
+		//req = NULL;
+		//task = NULL;
 	}catch(...){
 		std::cerr<<"bridjs::CallbackWrapper::onCallback=>Unknown exception"<<std::endl;
 	}
@@ -525,11 +577,11 @@ CallbackTask::CallbackTask(CallbackWrapper *pCallbackWrapper, DCCallback *pDCCal
 	int32_t error;
 
 	memset(&mCond,0, sizeof(uv_cond_t));
-	memset(&mAsync,0,sizeof(uv_async_t));
+	//memset(&mAsync,0,sizeof(uv_async_t));
 
-	uv_async_init(uv_default_loop(),&mAsync,invokeV8Callback);
+	//uv_async_init(uv_default_loop(),&mAsync,invokeV8Callback);
 
-	mAsync.data = this;
+	//mAsync.data = this;
 
     error = uv_cond_init(&mCond);
 
@@ -542,10 +594,10 @@ CallbackTask::CallbackTask(CallbackWrapper *pCallbackWrapper, DCCallback *pDCCal
 		throw std::runtime_error(message.str());
 	}	
 }
-
+/*
 uv_async_t* CallbackTask::getAsync(){
 	return &mAsync;
-}
+}*/
 
 void CallbackTask::wait(){
 	uv_cond_wait(&mCond, this->mpCallbackWrapper->getMutex());
@@ -576,6 +628,5 @@ void CallbackTask::done(){
 
 CallbackTask::~CallbackTask(){
 	uv_cond_destroy(&mCond);
-	//std::cout<<this<<std::endl;
-	
+	//std::cout<<"~CallbackTask()"<<std::endl;
 }
