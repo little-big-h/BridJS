@@ -50,7 +50,7 @@ v8::Local<v8::Value> ObjectCollection::get(const uint32_t i) const{
 		return this->mObject->Get(i);
 	}else{
 		std::stringstream message;
-		message<<"No indexed property: "<<i<<"from "<<*v8::String::Utf8Value(this->mObject)<<std::endl;
+		message<<"Invalid number of arguments, fail to get argument by index "<<i<<" from "<<*v8::String::Utf8Value(this->mObject)<<std::endl;
 			throw std::runtime_error(message.str());
 	}
 	

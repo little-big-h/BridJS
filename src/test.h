@@ -91,6 +91,7 @@ extern "C"{
 	UV_EXTERN double testStructValueFunction(const TestStruct testStruct);
 	UV_EXTERN double testComplexStructFunction(const TestComplexStruct* pTestStruct);
 	UV_EXTERN double testArrayStructFunction(const TestArrayStruct* pTestStruct);
-	UV_EXTERN const TestStruct* testStructPassByPointer(const TestStruct* pTestStruct);
+	UV_EXTERN const TestStruct* testStructPassByPointerFunction(const TestStruct* pTestStruct);
 	UV_EXTERN void testStructCallbackFunction(const TestStruct* pTestStruct,TestStructCallbackFunction callbackFunction);
+	UV_EXTERN const double* testValuePassByPointerFunction(const double *returnValue);
 }

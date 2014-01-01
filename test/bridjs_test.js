@@ -212,7 +212,9 @@ var lib;
 
             var Tester, testerInstance, TestStruct, testStruct, TestComplexStruct, Point2d,Point3d, 
                 testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback, testStruct2, 
-                HugeArrayStruct, structCallback;
+                HugeArrayStruct, structCallback, 
+                DoubleValue = bridjs.NativeValue.Double, 
+                doubleValue;
 
             //bridjs.register(Tester, libPath);
              TestStruct = bridjs.defineStruct({
@@ -230,8 +232,9 @@ var lib;
                 testComplexStructFunction :  bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testAsyncCallbackFunction : bridjs.defineFunction(Signature.VOID_TYPE, Signature.POINTER_TYPE),
-                testStructPassByPointer:bridjs.defineFunction(bridjs.byPointer(TestStruct), Signature.POINTER_TYPE),
-                testStructCallbackFunction:bridjs.defineFunction(Signature.VOID_TYPE,bridjs.byPointer(TestStruct), Signature.POINTER_TYPE)
+                testStructPassByPointerFunction:bridjs.defineFunction(bridjs.byPointer(TestStruct), Signature.POINTER_TYPE),
+                testStructCallbackFunction:bridjs.defineFunction(Signature.VOID_TYPE,bridjs.byPointer(TestStruct), Signature.POINTER_TYPE),
+                testValuePassByPointerFunction:bridjs.defineFunction(bridjs.byPointer(DoubleValue),bridjs.byPointer(DoubleValue))
             }, libPath);
 
             testerInstance = new Tester();
@@ -352,14 +355,14 @@ var lib;
                 //pass
             }
             
-            ret = testerInstance.testStructPassByPointer(bridjs.getStructPointer(testStruct));
+            ret = testerInstance.testStructPassByPointerFunction(bridjs.getStructPointer(testStruct));
             
             testStruct2 = ret;
+
+            assert(testStruct2.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointerFunction");
             
-            assert(testStruct2.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointer");
-            
-            bridjs.async(testerInstance).testStructPassByPointer(bridjs.getStructPointer(testStruct), function(result){
-                assert(result.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointer asynchronously");
+            bridjs.async(testerInstance).testStructPassByPointerFunction(bridjs.getStructPointer(testStruct), function(result){
+                assert(result.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointerFunction asynchronously");
             });
             
             structCallback  = bridjs.newCallback(bridjs.defineFunction(Signature.DOUBLE_TYPE, bridjs.byPointer(TestStruct)), function(testStructArg) {
@@ -370,12 +373,15 @@ var lib;
             });
             testerInstance.testStructCallbackFunction(bridjs.byPointer(testStruct),structCallback);
             
+            doubleValue = new DoubleValue(2.5);
+            
+            console.log("doubleValue:"+doubleValue.get());
+            
+            ret = testerInstance.testValuePassByPointerFunction(bridjs.byPointer(doubleValue));
+            
+            assert(doubleValue.get() === ret.get() ,"Fail to call testerInstance.testValuePassByPointerFunction");
             //bridjs.unregister(Tester);
             log.info("Test prototype binding pass");
-            
-            log.warn("2. Support return struct pointer");
-            log.warn("3. Support primitive pointer");
-            log.warn("4. Support class to type conversion");
         }
         //clearInterval(interval);
     };

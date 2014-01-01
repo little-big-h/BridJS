@@ -73,12 +73,16 @@ extern "C"{
 		return pTestStruct->w*pTestStruct->first[1]*pTestStruct->second[2];
 	}
 
-	const TestStruct* testStructPassByPointer(const TestStruct* pTestStruct){
+	const TestStruct* testStructPassByPointerFunction(const TestStruct* pTestStruct){
 		return pTestStruct;
 	}
 
 	void testStructCallbackFunction(const TestStruct* pTestStruct,TestStructCallbackFunction callbackFunction){
 		//std::cout<<(void*)callbackFunction<<std::endl;
 		std::cout<<"testStructCallbackFunction: "<<callbackFunction(pTestStruct)<<std::endl;
+	}
+
+	const double* testValuePassByPointerFunction(const double *returnValue){
+		return returnValue;
 	}
 }
