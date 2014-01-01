@@ -11,10 +11,6 @@ extern "C"
 	#include "dyncall_signature.h"
 }
 
-typedef double (*MultiplyCallbackFunction)(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e);
-
-
-
 using namespace v8;
 
 namespace bridjs{
@@ -84,6 +80,10 @@ extern "C"{
 		int64_t z;
 	} TestComplexStruct;
 
+	typedef double (*MultiplyCallbackFunction)(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e);
+	typedef double (*TestStructCallbackFunction)(const TestStruct* pTestStruct);
+
+
 	UV_EXTERN double testMultiplyFunction(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e);
 	UV_EXTERN double testStructFunction(const TestStruct* pTestStruct);
 	UV_EXTERN void testCallbackFunction(MultiplyCallbackFunction callbackFunction);
@@ -91,4 +91,6 @@ extern "C"{
 	UV_EXTERN double testStructValueFunction(const TestStruct testStruct);
 	UV_EXTERN double testComplexStructFunction(const TestComplexStruct* pTestStruct);
 	UV_EXTERN double testArrayStructFunction(const TestArrayStruct* pTestStruct);
+	UV_EXTERN const TestStruct* testStructPassByPointer(const TestStruct* pTestStruct);
+	UV_EXTERN void testStructCallbackFunction(const TestStruct* pTestStruct,TestStructCallbackFunction callbackFunction);
 }

@@ -210,20 +210,29 @@ var lib;
         {
             log.info("Test prototype binding start");
 
-            var Tester = my.Class({
+            var Tester, testerInstance, TestStruct, testStruct, TestComplexStruct, Point2d,Point3d, 
+                testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback, testStruct2, 
+                HugeArrayStruct, structCallback;
+
+            //bridjs.register(Tester, libPath);
+             TestStruct = bridjs.defineStruct({
+                x : bridjs.structField(Signature.INT16_TYPE,0),
+                y : bridjs.structField(Signature.INT32_TYPE,1),
+                z : bridjs.structField(Signature.LONG_TYPE,2),
+                w : bridjs.structField(Signature.LONGLONG_TYPE,3),
+                e : bridjs.structField(Signature.DOUBLE_TYPE,4)
+            });
+            
+            Tester = bridjs.defineModule({
                 testMultiplyFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.INT16_TYPE, Signature.INT32_TYPE,
                         Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE),
                 testStructFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testComplexStructFunction :  bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
-                testAsyncCallbackFunction : bridjs.defineFunction(Signature.VOID_TYPE, Signature.POINTER_TYPE)
-            }), testerInstance, TestStruct, testStruct, TestComplexStruct, Point2d,Point3d, 
-                testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback, 
-                HugeArrayStruct;
-
-            bridjs.register(Tester, libPath);
-
-
+                testAsyncCallbackFunction : bridjs.defineFunction(Signature.VOID_TYPE, Signature.POINTER_TYPE),
+                testStructPassByPointer:bridjs.defineFunction(bridjs.byPointer(TestStruct), Signature.POINTER_TYPE),
+                testStructCallbackFunction:bridjs.defineFunction(Signature.VOID_TYPE,bridjs.byPointer(TestStruct), Signature.POINTER_TYPE)
+            }, libPath);
 
             testerInstance = new Tester();
             //log.info("Register Tester.testMultiplyFunctio: "+testerInstance.testMultiplyFunction);
@@ -247,13 +256,7 @@ var lib;
             
             //log.info(bridjs.async(testerInstance));
  
-            TestStruct = bridjs.defineStruct({
-                x : bridjs.structField(Signature.INT16_TYPE,0),
-                y : bridjs.structField(Signature.INT32_TYPE,1),
-                z : bridjs.structField(Signature.LONG_TYPE,2),
-                w : bridjs.structField(Signature.LONGLONG_TYPE,3),
-                e : bridjs.structField(Signature.DOUBLE_TYPE,4)
-            });
+           
             Point2d = my.Class(bridjs.Struct,{
                 constructor:function(){
                     Point2d.Super.call(this);
@@ -349,12 +352,27 @@ var lib;
                 //pass
             }
             
+            ret = testerInstance.testStructPassByPointer(bridjs.getStructPointer(testStruct));
             
+            testStruct2 = ret;
+            
+            assert(testStruct2.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointer");
+            
+            bridjs.async(testerInstance).testStructPassByPointer(bridjs.getStructPointer(testStruct), function(result){
+                assert(result.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointer asynchronously");
+            });
+            
+            structCallback  = bridjs.newCallback(bridjs.defineFunction(Signature.DOUBLE_TYPE, bridjs.byPointer(TestStruct)), function(testStructArg) {
+                //log.info(testStructArg.e);
+                assert(testStructArg.e === testStruct.e ,"Fail to call testerInstance.testStructCallbackFunction");
+                
+                return testStructArg.w * testStructArg.x * testStructArg.y * testStructArg.z * testStructArg.e;
+            });
+            testerInstance.testStructCallbackFunction(bridjs.byPointer(testStruct),structCallback);
             
             //bridjs.unregister(Tester);
             log.info("Test prototype binding pass");
             
-            log.warn("1. Support large array field");
             log.warn("2. Support return struct pointer");
             log.warn("3. Support primitive pointer");
             log.warn("4. Support class to type conversion");
