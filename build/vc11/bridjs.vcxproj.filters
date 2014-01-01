@@ -107,5 +107,8 @@
     <ClCompile Include="..\..\src\test.cc">
       <Filter>..\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\array_struct_v8.cc">
+      <Filter>..\src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

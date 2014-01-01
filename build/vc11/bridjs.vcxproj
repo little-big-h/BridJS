@@ -168,6 +168,7 @@
     <ClInclude Include="..\..\src\test.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\array_struct_v8.cc" />
     <ClCompile Include="..\..\src\bridjs_module.cc" />
     <ClCompile Include="..\..\src\dyncallback_v8.cc" />
     <ClCompile Include="..\..\src\dyncall_v8.cc" />

@@ -22,7 +22,8 @@ var lib;
             Signature = bridjs.dc.Signature, NativeFunction = bridjs.dc.NativeFunction, nativeFunction,
             startSeconds, CallbackObject, afterDyncallTest, afterDyncallbackTest, callbackHandler,
             i, iteration = 100000, dcbCallbackCount = 2, testStruct, testStructBuffer,
-            offset, os = require("os"), typeSize, testStructFunction, structObject, testStructValueFunction;
+            offset, os = require("os"), typeSize, testStructFunction, structObject, 
+            testStructValueFunction, arrayStruct;
     //console.log(libPath); 
 
     CallbackObject = my.Class({
@@ -135,7 +136,17 @@ var lib;
         } else {
             throw "Fail to locate testStructFunction from native lirary";
         }
-       
+        
+        arrayStruct = new bridjs.dc.ArrayStruct(Signature.CHAR_TYPE, 3);
+        testStructBuffer = new Buffer(arrayStruct.getSize());
+        log.info("Array struct's size: "+arrayStruct.getSize());
+        
+        arrayStruct.setField(0, 'x', testStructBuffer);
+        arrayStruct.setField(1, 'y', testStructBuffer);
+        arrayStruct.setField(2, 'z', testStructBuffer);
+        //log.info(arrayStruct.getField(1, testStructBuffer));
+        assert(arrayStruct.getField(1, testStructBuffer)==='y', "Fail to access ArrayStruct's element");
+        
         log.info("Test dyncall pass");
     } catch (e) {
         log.error(e);
@@ -207,7 +218,8 @@ var lib;
                 testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testAsyncCallbackFunction : bridjs.defineFunction(Signature.VOID_TYPE, Signature.POINTER_TYPE)
             }), testerInstance, TestStruct, testStruct, TestComplexStruct, Point2d,Point3d, 
-                testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback;
+                testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback, 
+                HugeArrayStruct;
 
             bridjs.register(Tester, libPath);
 
@@ -279,6 +291,14 @@ var lib;
                 first:bridjs.structArrayField(Signature.CHAR_TYPE,3,1),
                 second:bridjs.structArrayField(Signature.CHAR_TYPE,3,2)
             });
+            
+            HugeArrayStruct = bridjs.defineStruct({
+                largeBuffer:bridjs.structArrayField(Signature.CHAR_TYPE,4*1024*1024,0)
+            });
+            
+            log.info("HugeArrayStruct's size: "+bridjs.getStructSize(new HugeArrayStruct()));
+            
+            
             testStruct = new TestStruct();
             testStruct.x = testStruct.y = testStruct.z = testStruct.w = 2;
             testStruct.e = 2.5;
@@ -312,14 +332,16 @@ var lib;
             
             testArrayStruct = new TestArrayStruct();
             testArrayStruct.w = 1;
-            testArrayStruct.first[1] = 2;
-            testArrayStruct.second[2] = 's';
+            testArrayStruct.first.set(1,2);
+            testArrayStruct.second.set(2,'s');
             
-            ret = testArrayStruct.second[2];
+            ret = testArrayStruct.second.get(2);
             assert((ret ==='s'), "Fail to access array field");
             
             ret = testerInstance.testArrayStructFunction(bridjs.getStructPointer(testArrayStruct));
             assert((ret ===230), "Fail to access array field");
+            
+            log.info("testArrayStruct's size: "+bridjs.getStructSize(testArrayStruct));
             try{
                 ret = testerInstance.testArrayStructFunction(testArrayStruct);
                 assert(false, "Fail to handle non-pointer type value");
@@ -327,8 +349,15 @@ var lib;
                 //pass
             }
             
+            
+            
             //bridjs.unregister(Tester);
             log.info("Test prototype binding pass");
+            
+            log.warn("1. Support large array field");
+            log.warn("2. Support return struct pointer");
+            log.warn("3. Support primitive pointer");
+            log.warn("4. Support class to type conversion");
         }
         //clearInterval(interval);
     };

@@ -16,7 +16,7 @@ using namespace node;
 Persistent<v8::Function> bridjs::Struct::constructor;
 
 
- v8::Handle<v8::Value> GetSize(const v8::Arguments& args){
+ v8::Handle<v8::Value> bridjs::Struct::GetSize(const v8::Arguments& args){
 	HandleScope scope;
 	bridjs::Struct* obj = ObjectWrap::Unwrap<bridjs::Struct>(args.This());
 	v8::Handle<v8::Value> value;
@@ -30,7 +30,7 @@ Persistent<v8::Function> bridjs::Struct::constructor;
 	return value;
  }
 
- v8::Handle<v8::Value> GetField(const v8::Arguments& args){
+ v8::Handle<v8::Value> bridjs::Struct::GetField(const v8::Arguments& args){
 	HandleScope scope;
 	bridjs::Struct* obj = ObjectWrap::Unwrap<bridjs::Struct>(args.This());
 	v8::Handle<v8::Value> value;
@@ -46,7 +46,7 @@ Persistent<v8::Function> bridjs::Struct::constructor;
 	return value;
  }
 
-v8::Handle<v8::Value> SetField(const v8::Arguments& args){
+v8::Handle<v8::Value> bridjs::Struct::SetField(const v8::Arguments& args){
 	HandleScope scope;
 	bridjs::Struct* obj = ObjectWrap::Unwrap<bridjs::Struct>(args.This());
 	v8::Handle<v8::Value> value;
@@ -149,7 +149,7 @@ v8::Handle<v8::Value> SetField(const v8::Arguments& args){
 	}
  }
 
-  v8::Handle<v8::Value> GetSignature(const v8::Arguments& args){
+  v8::Handle<v8::Value> bridjs::Struct::GetSignature(const v8::Arguments& args){
 	HandleScope scope;
 	bridjs::Struct* obj = ObjectWrap::Unwrap<bridjs::Struct>(args.This());
 
@@ -165,7 +165,7 @@ v8::Handle<v8::Value> bridjs::Struct::ToString(const v8::Arguments& args){
 	return  scope.Close(WRAP_STRING(obj->toString().c_str()));
  }
 
- size_t getAlignSize(size_t size, size_t alignment)
+const size_t bridjs::Struct::getAlignSize(size_t size, size_t alignment)
 {
 	size_t mod = (size) % alignment;
 	if (mod) {
@@ -176,7 +176,7 @@ v8::Handle<v8::Value> bridjs::Struct::ToString(const v8::Arguments& args){
 	}
 }
 
-size_t getFieldsSize(const std::vector<const char> &fieldTypes, const size_t alignment){
+const size_t bridjs::Struct::getFieldsSize(const std::vector<const char> &fieldTypes, const size_t alignment){
 	size_t size = 0;
 
 	for(uint32_t i=0;i<fieldTypes.size();++i){
@@ -188,7 +188,7 @@ size_t getFieldsSize(const std::vector<const char> &fieldTypes, const size_t ali
 	return size;
 }
 
-size_t getAlignmentSize(const char type,const size_t typeSize, const bool isFirst){
+const size_t bridjs::Struct::getAlignmentSize(const char type,const size_t typeSize, const bool isFirst){
 
 				/*
 	 if (actualAlignType == ALIGN_NONE) {
@@ -224,7 +224,7 @@ size_t getAlignmentSize(const char type,const size_t typeSize, const bool isFirs
 
 }
 
-const size_t addPadding(size_t calculatedSize, const size_t alignment) {
+const size_t bridjs::Struct::addPadding(size_t calculatedSize, const size_t alignment) {
         // Structure size must be an integral multiple of its alignment,
         // add padding if necessary.
         //if (actualAlignType != ALIGN_NONE) {
@@ -467,7 +467,7 @@ const size_t bridjs::Struct::getFieldCount() const{
 }
 
 void bridjs::Struct::checkRange(const uint32_t index) const{
-	if(index>=this->mFieldTypes.size()){
+	if(index>=this->getFieldCount()){
 		std::stringstream message;
 
 		message<<"Index: "<<index<<" was out of boundary, size = "<<this->mFieldTypes.size();
@@ -492,10 +492,9 @@ Struct* bridjs::Struct::getSubStruct(uint32_t index){
 
 
 std::shared_ptr<void> bridjs::Struct::getField(const uint32_t index, const void* mPtr) const{
-	this->checkRange(index);
 	std::shared_ptr<void> data;
-	const char type= this->mFieldTypes[index];
-	const size_t offset = this->mOffsets[index];
+	const char type= this->getFieldType(index);
+	const size_t offset = this->getFieldOffset(index);
 	const char* ptr = static_cast<const char*>(mPtr)+offset;
 
 	switch(type){
@@ -575,9 +574,8 @@ std::shared_ptr<void> bridjs::Struct::getField(const uint32_t index, const void*
 }
 
 void bridjs::Struct::setField(const uint32_t index, std::shared_ptr<void> pValue, void* mPtr){
-		this->checkRange(index);
-	const char type= this->mFieldTypes[index];
-	const size_t offset = this->mOffsets[index];
+	const char type= this->getFieldType(index);
+	const size_t offset = this->getFieldOffset(index);
 	const char* ptr = static_cast<const char*>(mPtr)+offset;
 
 	switch(type){

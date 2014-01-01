@@ -8,6 +8,7 @@
 #include "dyncall_v8_utils.h"
 #include "struct_v8.h"
 #include "test.h"
+#include "array_struct_v8.h"
 
 #include <iostream>
 #include <node.h>
@@ -237,6 +238,8 @@ void init(Handle<Object> target) {
   bridjs::Pointer::Init(dyncallObj);
   bridjs::NativeFunction::Init(dyncallObj);
   bridjs::Struct::Init(dyncallObj);
+  bridjs::ArrayStruct::Init(dyncallObj);
+
   /*dyncallback*/
   target->Set(String::NewSymbol("dcb"), dyncallBackObj, ReadOnly);
   bridjs::Dyncallback::Init(dyncallBackObj);
