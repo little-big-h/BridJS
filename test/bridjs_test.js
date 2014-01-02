@@ -9,8 +9,7 @@ var lib;
 
 {/*Test dynload block*/
     libPath = __dirname + "/" + bridjs.LIBRARY_PATH + ".node";
-    lib = bridjs.dl.loadLibrary("libPath");
-
+    log.info(libPath);
     log.info("Lib: " + JSON.stringify(lib) + ", symbols: " + bridjs.symbols(libPath));
     log.info("Test dynload pass");
 
@@ -53,6 +52,9 @@ var lib;
     });
 
     try {
+        
+        log.info("Pointer's size = "+bridjs.getTypeSize(Signature.POINTER_TYPE));
+        
         startSeconds = Utils.timeSeconds();
         for (i = 0; i < iteration; ++i) {
             ret = bridjs.test.testMultiplyFunction(2, 2, 2, 2, 2.5);
@@ -302,7 +304,7 @@ var lib;
                 largeBuffer:bridjs.structArrayField(Signature.CHAR_TYPE,4*1024*1024,0)
             });
             
-            log.info("HugeArrayStruct's size: "+bridjs.getStructSize(new HugeArrayStruct()));
+            log.info("HugeArrayStruct's size: "+bridjs.getTypeSize(HugeArrayStruct));
             
             
             testStruct = new TestStruct();

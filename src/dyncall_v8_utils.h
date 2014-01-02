@@ -32,6 +32,9 @@
     return v8::ThrowException(v8::String::New(message.str().c_str())); \
   }\
 
+#define GET_UINT32_ARG(name, args, index) \
+	GET_UINT32_VALUE(name, args[index], index)
+
 #define GET_UINT32_VALUE(name, value, index) \
   Local<Value> name ## Value = value; \
   uint32_t name;\

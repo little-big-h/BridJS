@@ -360,7 +360,7 @@ v8::Handle<v8::Value> bridjs::Struct::GetFieldOffset(const v8::Arguments& args){
 	HandleScope scope;
 	bridjs::Struct* obj = ObjectWrap::Unwrap<bridjs::Struct>(args.This());
 	v8::Handle<v8::Value> value;
-	GET_INT32_ARG(index,args,0);
+	GET_UINT32_ARG(index,args,0);
 
 	try{
 		value =  scope.Close(WRAP_UINT(obj->getFieldOffset(index)));
