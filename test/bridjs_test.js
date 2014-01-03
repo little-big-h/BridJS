@@ -228,8 +228,8 @@ var lib;
             });
             
             Tester = bridjs.defineModule({
-                testMultiplyFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.INT16_TYPE, Signature.INT32_TYPE,
-                        Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE),
+                testMultiply: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.INT16_TYPE, Signature.INT32_TYPE,
+                        Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE).bind("testMultiplyFunction"),
                 testStructFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testComplexStructFunction :  bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
@@ -243,13 +243,13 @@ var lib;
             //log.info("Register Tester.testMultiplyFunctio: "+testerInstance.testMultiplyFunction);
             startSeconds = Utils.timeSeconds();
             for (i = 0; i < iteration; ++i) {
-                ret = testerInstance.testMultiplyFunction(2, 2, 2, 2, 2.5);
+                ret = testerInstance.testMultiply(2, 2, 2, 2, 2.5);
             }
             log.info("Spend " + ((Utils.timeSeconds() - startSeconds) / iteration) + " to invoke Tester.testStructFunction by prototype binding");
             assert(ret === 40, "Call Tester.testMultiplyFunction fail");
 
 
-            bridjs.async(testerInstance).testMultiplyFunction(2, 2, 2, 2, 2.5, function(result) {
+            bridjs.async(testerInstance).testMultiply(2, 2, 2, 2, 2.5, function(result) {
                 log.info(" bridjs.async(testerInstance).testMultiplyFunction results: " + result);
             });
             

@@ -196,16 +196,15 @@ void* bridjs::Utils::unwrapBufferToPointer(v8::Local<v8::Value> value){
 Handle<v8::Value> bridjs::Utils::wrapPointer(const void* ptr){
 	HandleScope scope;
 	Handle<v8::Value> result;
-	/*
+	
 	if(ptr!=NULL){
-		bridjs::Pointer *buf = bridjs::Pointer::New(ptr);
-		result =  scope.Close(buf->handle_);
+		result =  scope.Close(bridjs::Pointer::NewInstance(ptr));
 	}else{
 		result = scope.Close(v8::Null());
-	}*/
+	}
 
 	//bridjs::Pointer *buf = bridjs::Pointer::New(ptr);
-	result =  scope.Close(bridjs::Pointer::NewInstance(ptr));
+	//result =  scope.Close(bridjs::Pointer::NewInstance(ptr));
 
 	return result;
 
