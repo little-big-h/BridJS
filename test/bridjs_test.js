@@ -374,7 +374,8 @@ var lib;
                 return testStructArg.w * testStructArg.x * testStructArg.y * testStructArg.z * testStructArg.e;
             });
             testerInstance.testStructCallbackFunction(bridjs.byPointer(testStruct),structCallback);
-            
+            /*invoke twice for testing reuse case*/
+            testerInstance.testStructCallbackFunction(bridjs.byPointer(testStruct),structCallback);
             doubleValue = new DoubleValue(2.5);
             
             console.log("doubleValue:"+doubleValue.get());
