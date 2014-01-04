@@ -159,6 +159,8 @@ void init(Handle<Object> target) {
 		  bridjs::Utils::toV8String(DC_SIGCHAR_ULONG), ReadOnly);
 	 signatureObj->Set(String::NewSymbol("DOUBLE_TYPE"),
 		  bridjs::Utils::toV8String(DC_SIGCHAR_DOUBLE), ReadOnly);
+	 signatureObj->Set(String::NewSymbol("FLOAT_TYPE"),
+		  bridjs::Utils::toV8String(DC_SIGCHAR_FLOAT), ReadOnly);
 	 signatureObj->Set(String::NewSymbol("POINTER_TYPE"),
 		  bridjs::Utils::toV8String(DC_SIGCHAR_POINTER), ReadOnly);
 	signatureObj->Set(String::NewSymbol("STRING_TYPE"),

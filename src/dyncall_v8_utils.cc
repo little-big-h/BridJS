@@ -164,6 +164,23 @@ v8::Handle<v8::Value> WriteInt64(const v8::Arguments& args){
 void bridjs::Utils::Init(v8::Handle<v8::Object> utilsObj){
 	NODE_SET_METHOD(utilsObj,"getTypeSize",GetTypeSize);
 	NODE_SET_METHOD(utilsObj,"writeInt64",WriteInt64);
+	NODE_SET_METHOD(utilsObj,"pointerToString",PointerToString);
+}
+
+v8::Handle<v8::Value> bridjs::Utils::PointerToString(const v8::Arguments& args){
+	HandleScope scope;
+	GET_POINTER_ARG(const char,ptr,args,0);
+	v8::Local<v8::String> str;
+
+	if(args.Length()>=2){
+		GET_INT32_ARG(length,args,1);
+		str = v8::String::New(ptr,length);
+	}else{
+		str = v8::String::New(ptr);
+	}
+
+
+	return scope.Close(str);
 }
 
 Handle<Value> bridjs::Utils::wrapPointerToBuffer(const void* ptr){

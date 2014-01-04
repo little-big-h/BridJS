@@ -262,6 +262,7 @@ namespace bridjs {
 	class Utils{
 	public:
 		static void Init(v8::Handle<v8::Object> utilsObj);
+		static v8::Handle<v8::Value> PointerToString(const v8::Arguments& args);
 		static v8::Handle<v8::Value> wrapPointerToBuffer(const void* ptr);
 		static void* unwrapBufferToPointer(v8::Local<v8::Value> value);
 		static v8::Handle<v8::Value> wrapPointer(const void* ptr);
