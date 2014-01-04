@@ -86,7 +86,7 @@ var ComplexStruct = bridjs.defineStruct({
 });
 
 var NativeModule = bridjs.defineModule({
-    testComplexStructFunction(:  bridjs.defineFunction(Sig.double, bridjs.byPointer(ComplexStruct))
+    testComplexStructFunction : bridjs.defineFunction(Sig.double, bridjs.byPointer(ComplexStruct))
     }, libraryPath);
 
 var complexStruct = new ComplexStruct();
@@ -108,3 +108,66 @@ bridjs.defineStruct({
     ...
 });
 ``` 
+####3. Invoke native function asynchronously
+--------------------------------------------
+``` bash
+/*You can execute any native function asynchronously (not in default thread), and get return value from callback*/
+bridjs.aysnc(nativeModule).testMultiplyFunction(2,2,2,2,2.5, function(returnValue){
+    console.log("Return value = "+returnValue)
+});
+```
+Async execute native function API
+``` bash
+bridjs.async(moduleInstance).function(param1, param2,....callbackFunction);
+```
+####4. C function pointer
+-------------------------
+If C code is something like this:
+``` bash
+typedef double (*MultiplyCallbackFunction)(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e);
+void testCallbackFunction(MultiplyCallbackFunction callbackFunction);
+```
+You can define JavaScript prototype like this:
+``` bash
+var callbackFunctionDefine = bridjs.defineFunction(Signature.double, 
+    Signature.int16, Signature.int32, Signature.long, Signature.longlong, 
+    Signature.double);
+
+var callback = bridjs.newCallback(callbackFunctionDefine, function(w, x, y, z, e) {
+        console.log("Callback function was invoked");
+    
+        return w*x*y*z*e;
+});
+
+var NativeModule = bridjs.defineModule({
+    testCallbackFunction : bridjs.defineFunction(Sig.void, callbackFunctionDefine)
+    }, libraryPath);
+
+var nativeModule = new NativeModule();
+
+nativeModule.testAsyncCallbackFunction(callback);    
+```
+Create function pointer API
+``` bash
+bridjs.newCallback(functionSignature,callbackFunction);
+```
+####5. Pass primitive type by pointer
+-------------------------------------
+If C code is something like this:
+``` bash
+const double* testValuePassByPointerFunction(const double *returnValue);
+```
+You can define JavaScript prototype like this:
+``` bash
+var NativeModule = bridjs.defineModule({
+    testValuePassByPointerFunction:  bridjs.defineFunction(bridjs.byPointer(Sig.double), bridjs.byPointer(Sig.double))
+    }, libraryPath);
+
+var nativeDouble = new bridjs.NativeValue.double(2.5);  
+
+var nativeModule = new NativeModule();
+
+var returnNativeDouble = nativeModule.testValuePassByPointerFunction(bridjs.byPointer(nativeDouble));    
+
+var result = returnNativeDouble.get();
+```
