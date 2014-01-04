@@ -215,7 +215,7 @@ var lib;
             var Tester, testerInstance, TestStruct, testStruct, TestComplexStruct, Point2d,Point3d, 
                 testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback, testStruct2, 
                 HugeArrayStruct, structCallback, 
-                DoubleValue = bridjs.NativeValue.Double, 
+                DoubleValue = bridjs.NativeValue.double, 
                 doubleValue;
 
             //bridjs.register(Tester, libPath);
@@ -228,8 +228,8 @@ var lib;
             });
             
             Tester = bridjs.defineModule({
-                testMultiply: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.INT16_TYPE, Signature.INT32_TYPE,
-                        Signature.LONG_TYPE, Signature.LONGLONG_TYPE, Signature.DOUBLE_TYPE).bind("testMultiplyFunction"),
+                testMultiply: bridjs.defineFunction(Signature.double, Signature.int16, Signature.int32,
+                        Signature.long, Signature.longlong, Signature.double).bind("testMultiplyFunction"),
                 testStructFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testComplexStructFunction :  bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
