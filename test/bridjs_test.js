@@ -133,7 +133,7 @@ var lib;
         log.info("Spend " + ((Utils.timeSeconds() - startSeconds) / iteration) + " to invoke testMultiplyFunction by NativeFunction");
         log.info("2 x 2 x 2 x 2 x 2.5 = " + nativeFunction.call(vm, 2, 2, 2, 2, 2.5));
 
-        nativeFunction.callAsync(vm, 2, 2, 2, 2, 2.5, new CallbackObject());
+        nativeFunction.callAsync(4096, 2, 2, 2, 2, 2.5, new CallbackObject());
 
         if (testStructFunction) {
             structObject = new bridjs.dyncall.Struct(Signature.INT16_TYPE, Signature.INT32_TYPE,
@@ -396,6 +396,7 @@ var lib;
             assert(testStruct2.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointerFunction");
             
             bridjs.async(testerInstance).testStructPassByPointerFunction(bridjs.getStructPointer(testStruct), function(result){
+                //log.info(result.e);
                 assert(result.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointerFunction asynchronously");
             });
             
@@ -408,13 +409,13 @@ var lib;
             testerInstance.testStructCallbackFunction(bridjs.byPointer(testStruct),structCallback);
             /*invoke twice for testing reuse case*/
             testerInstance.testStructCallbackFunction(bridjs.byPointer(testStruct),structCallback);
-            doubleValue = new DoubleValue(2.5);
+            doubleValue = new bridjs.NativeValue.double(2.5);
             
             console.log("doubleValue:"+doubleValue.get());
             
             ret = testerInstance.testValuePassByPointerFunction(bridjs.byPointer(doubleValue));
-            
-            assert(doubleValue.get() === ret.get() ,"Fail to call testerInstance.testValuePassByPointerFunction");
+            //console.log("doubleValue:"+doubleValue.get());
+            assert(doubleValue.get() === 2.5 ,"Fail to call testerInstance.testValuePassByPointerFunction");
             //bridjs.unregister(Tester);
             log.info("Test prototype binding pass");
         }

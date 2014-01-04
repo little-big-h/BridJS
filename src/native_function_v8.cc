@@ -430,16 +430,20 @@ v8::Handle<v8::Value> bridjs::NativeFunction::Call(const v8::Arguments& args){
 v8::Handle<v8::Value> bridjs::NativeFunction::CallAsync(const v8::Arguments& args){
 	HandleScope scope;
 	bridjs::NativeFunction* nativeFunction = ObjectWrap::Unwrap<NativeFunction>(args.This());
-	GET_POINTER_ARG(DCCallVM,vm,args,0);
+	//GET_POINTER_ARG(DCCallVM,vm,args,0);
 	
 	if(nativeFunction!=NULL){
 		Local<v8::Value> callbackObject; 
 		Handle<Value> error;
 		bool hasArgParameter = false;
-		try{
-				dcReset(vm);
+		GET_UINT32_ARG(stackSize, args,0);
+		DCCallVM *vm = dcNewCallVM(stackSize);
 
-				if(/*args[1]->IsArray()*/args[1]->IsObject()){
+		try{
+
+			dcReset(vm);
+
+			if(/*args[1]->IsArray()*/args[1]->IsObject()){
 				v8::Local<Object> object = args[1]->ToObject();
 				if(object->GetConstructorName()->Equals(ARGUMENTS_NAME)){
 
@@ -460,35 +464,35 @@ v8::Handle<v8::Value> bridjs::NativeFunction::CallAsync(const v8::Arguments& arg
 				}
 			}
 			if(!hasArgParameter){
-					const ArgumentCollection collection(&args);
-					callbackObject = args[args.Length()-1];
+				const ArgumentCollection collection(&args);
+				callbackObject = args[args.Length()-1];
 
-					if(callbackObject->IsObject()){
-						error = pushArgs(vm,nativeFunction, &collection,1);
-					}else{
-						std::stringstream message;
-						message<<"Last argument must a CallbackObject's instance: "<<(*v8::String::Utf8Value(callbackObject->ToString()))<<std::endl;
-						return v8::Exception::TypeError(v8::String::New(message.str().c_str()));
-					}
-				}
-
-				if(error->IsNull()){
-					uv_work_t *req = new uv_work_t;
-					req->data = new bridjs::AsyncCallTask(vm,nativeFunction,Persistent<Object>::New(callbackObject->ToObject()));
-					uv_queue_work(uv_default_loop(),req,executeCallAsync,(uv_after_work_cb)afterCallAsync);
-
-					return scope.Close(v8::Undefined());
+				if(callbackObject->IsObject()){
+					error = pushArgs(vm,nativeFunction, &collection,1);
 				}else{
-					return error;
+					std::stringstream message;
+					message<<"Last argument must a CallbackObject's instance: "<<(*v8::String::Utf8Value(callbackObject->ToString()))<<std::endl;
+					return v8::Exception::TypeError(v8::String::New(message.str().c_str()));
 				}
-			}catch(std::out_of_range& e){
-				return THROW_EXCEPTION(e.what());
 			}
+
+			if(error->IsNull()){
+				uv_work_t *req = new uv_work_t;
+				req->data = new bridjs::AsyncCallTask(vm,nativeFunction,Persistent<Object>::New(callbackObject->ToObject()));
+				uv_queue_work(uv_default_loop(),req,executeCallAsync,(uv_after_work_cb)afterCallAsync);
+
+				return scope.Close(v8::Undefined());
+			}else{
+				return error;
+			}
+		}catch(std::out_of_range& e){
+			if(vm!=NULL){
+				dcFree(vm);
+			}
+
+			return THROW_EXCEPTION(e.what());
+		}
 	}else{
-		std::stringstream message;
-
-		message<<"Last argument must a CallbackObject's instance: "<<(*v8::String::Utf8Value(args.This()->ToString()))<<std::endl;
-
 		return v8::Exception::TypeError(v8::String::New("This must be NativeFunction's instance"));
 	}
 }
@@ -593,5 +597,9 @@ void AsyncCallTask::done(){
 }
 
 AsyncCallTask::~AsyncCallTask(){
-	
+	/*The VM was created by CallAsync*/
+	if(this->mpVM!=NULL){
+		dcFree(this->mpVM);
+	}
+	this->mpVM = NULL;
 }
