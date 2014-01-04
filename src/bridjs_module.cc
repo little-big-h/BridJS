@@ -255,6 +255,7 @@ void init(Handle<Object> target) {
   std::locale::global(std::locale(""));
   std::wcout.imbue(std::locale(""));
 
+
   //TempStruct tempStruct;
 
   //std::cout<<sizeof(TestArrayStruct)<<", "<<sizeof(TempStruct)<<", "<<(uint64_t*)&tempStruct.point-(uint64_t*)&tempStruct.w<<", "<<sizeof(TestComplexStruct)<<std::endl;
