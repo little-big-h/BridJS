@@ -171,3 +171,6 @@ var returnNativeDouble = nativeModule.testValuePassByPointerFunction(bridjs.byPo
 
 var result = returnNativeDouble.get();
 ```
+###License
+
+BSD License. See the `LICENSE` file.
