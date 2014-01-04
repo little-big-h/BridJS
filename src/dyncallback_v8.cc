@@ -506,6 +506,8 @@ bridjs::CallbackWrapper::CallbackWrapper(const char returnType, const std::vecto
 	memset(&mMutex,0, sizeof(uv_mutex_t));
     error = uv_mutex_init(&mMutex);
 
+	//std::cout<<returnType<<std::endl<<argumentTypes.size()<<std::endl;
+
 	if(error!=0){
 		std::ostringstream message;
 
