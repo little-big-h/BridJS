@@ -228,7 +228,7 @@ const size_t bridjs::Struct::getAlignmentSize(const char type, const size_t type
     size_t alignment = typeSize;
     
     if (!isFirst) {
-        alignment = std::min(sizeof (DClonglong), alignment);
+        alignment = std::min(sizeof (void*), alignment);
     }
     
     return alignment;

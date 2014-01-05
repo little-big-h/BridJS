@@ -58,9 +58,11 @@
       <runprofile version="9">
         <runcommandpicklist>
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
+          <runcommandpicklistitem>./nodejs-x86 test/bridjs_test.js</runcommandpicklistitem>
+          <runcommandpicklistitem>nodejs test/bridjs_test.js</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir></rundir>
+        <runcommand>nodejs test/bridjs_test.js</runcommand>
+        <rundir>/home/jiahan/works/BridJS/</rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>
         <remove-instrumentation>0</remove-instrumentation>
@@ -91,9 +93,11 @@
       <runprofile version="9">
         <runcommandpicklist>
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
+          <runcommandpicklistitem>./node-x86 test/bridjs_test.js</runcommandpicklistitem>
+          <runcommandpicklistitem>./nodejs-x86 test/bridjs_test.js</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir></rundir>
+        <runcommand>./nodejs-x86 test/bridjs_test.js</runcommand>
+        <rundir>/home/jiahan/works/BridJS/</rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>
         <remove-instrumentation>0</remove-instrumentation>
