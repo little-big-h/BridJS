@@ -42,7 +42,7 @@ var lib;
 {/*Test dynload block*/
     libPath = __dirname + "/" + bridjs.LIBRARY_PATH + ".node";
     log.info(libPath);
-    log.info("Lib: " + JSON.stringify(lib) + ", symbols: " + bridjs.symbols(libPath));
+    //log.info("Lib: " + JSON.stringify(lib) + ", symbols: " + bridjs.symbols(libPath));
     log.info("Test dynload pass");
 
 }
@@ -277,7 +277,7 @@ var lib;
             for (i = 0; i < iteration; ++i) {
                 ret = testerInstance.testMultiply(2, 2, 2, 2, 2.5);
             }
-            log.info("Spend " + ((Utils.timeSeconds() - startSeconds) / iteration) + " to invoke Tester.testStructFunction by prototype binding");
+            log.info("Spend " + ((Utils.timeSeconds() - startSeconds) / iteration) + " to invoke Tester.testMultiplyFunction by prototype binding");
             assert(ret === 40, "Call Tester.testMultiplyFunction fail");
 
 
