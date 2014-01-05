@@ -16,7 +16,7 @@ Like [BridJ](http://bridj.googlecode.com), BridJS also has some limitations:
 * BridJS does **not support** C++, COM, Objective-C...
 
 ###Requirement
-* [nodejs](http://nodejs.org/) v0.10.22 or higher
+* [nodejs](http://nodejs.org/) v0.10.15 or higher
 * Windows with [Visual C++ Redistributable for Visual Studio 2012](http://www.microsoft.com/en-us/download/details.aspx?id=30679) or Linux
 
 ###Installation
