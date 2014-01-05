@@ -78,7 +78,7 @@ v8::Handle<v8::Value> bridjs::ArrayStruct::New(const v8::Arguments& args){
 
 
 bridjs::ArrayStruct::ArrayStruct(const char type, const size_t length, 
-								 const size_t alignment):mType(type),mLength(length), bridjs::Struct(std::vector<const char>(),
+								 const size_t alignment):mType(type),mLength(length), bridjs::Struct(std::vector<char>(),
 								 std::map<uint32_t,v8::Local<v8::Object>>(), alignment){
 
 	this->mSize = this->deriveArrayLayout(alignment);		

@@ -392,7 +392,7 @@ v8::Handle<v8::Value> Dyncall::structSize(const v8::Arguments& args){
 
 	GET_POINTER_ARG(DCstruct,structPtr, args,0);
 
-	return scope.Close(WRAP_UINT(dcStructSize(structPtr)));
+	return scope.Close(WRAP_UINT(static_cast<uint32_t>(dcStructSize(structPtr))));
 }
 
 v8::Handle<v8::Value> Dyncall::defineStruct(const v8::Arguments& args){

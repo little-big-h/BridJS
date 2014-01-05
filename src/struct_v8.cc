@@ -379,7 +379,7 @@ v8::Handle<v8::Value> bridjs::Struct::GetFieldOffset(const v8::Arguments& args) 
     GET_UINT32_ARG(index, args, 0);
 
     try {
-        value = scope.Close(WRAP_UINT(obj->getFieldOffset(index)));
+        value = scope.Close(WRAP_UINT(static_cast<uint32_t>(obj->getFieldOffset(index))));
     } catch (std::out_of_range& e) {
         value = THROW_EXCEPTION(e.what());
     }
