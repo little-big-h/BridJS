@@ -1,9 +1,7 @@
 lib/bridjs/win32_x64
 node_modules
-build/netbeans
 dyncall
 *~
 .DS_Store
 non_committable_experiments
-netbeans
-deps
+node-x86.exe

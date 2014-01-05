@@ -60,7 +60,7 @@ v8::Handle<v8::Value> bridjs::ArrayStruct::New(const v8::Arguments& args){
 		GET_CHAR_ARG(type, args,0);
 		GET_INT64_ARG(length, args,1);
 		size_t alignment = DEFAULT_ALIGNMENT;
-		ArrayStruct *obj = new ArrayStruct(type, length, alignment);
+		ArrayStruct *obj = new ArrayStruct(type, static_cast<size_t>(length), alignment);
 
 		obj->Wrap(args.This());
 
