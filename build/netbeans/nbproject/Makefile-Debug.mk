@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1445274692/array_struct_v8.o \
 	${OBJECTDIR}/_ext/1445274692/bridjs_module.o \
 	${OBJECTDIR}/_ext/1445274692/dyncall_v8.o \
 	${OBJECTDIR}/_ext/1445274692/dyncall_v8_utils.o \
@@ -75,6 +76,11 @@ ${CND_DISTDIR}/../../../linux_x64/bridjs.node: ../../deps/dyncall-0.7/linux_x64/
 ${CND_DISTDIR}/../../../linux_x64/bridjs.node: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/../../../linux_x64
 	${LINK.cc} -o ${CND_DISTDIR}/../../../linux_x64/bridjs.node ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
+
+${OBJECTDIR}/_ext/1445274692/array_struct_v8.o: ../../src/array_struct_v8.cc 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1445274692
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../deps/dyncall-0.7/include -I/usr/include/nodejs/deps/v8/include -I/usr/include/nodejs/src -I/usr/include/nodejs/deps/uv/include -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1445274692/array_struct_v8.o ../../src/array_struct_v8.cc
 
 ${OBJECTDIR}/_ext/1445274692/bridjs_module.o: ../../src/bridjs_module.cc 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1445274692
