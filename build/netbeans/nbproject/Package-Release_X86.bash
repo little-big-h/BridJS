@@ -7,13 +7,13 @@
 # Macros
 TOP=`pwd`
 CND_PLATFORM=GNU-Linux-x86
-CND_CONF=Debug
+CND_CONF=Release_X86
 CND_DISTDIR=dist
 CND_BUILDDIR=build
 CND_DLIB_EXT=so
 NBTMPDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=${CND_DISTDIR}/../../../linux_x64/bridjs.node
+OUTPUT_PATH=${CND_DISTDIR}/../../../linux_ia32/bridjs.node
 OUTPUT_BASENAME=bridjs.node
 PACKAGE_TOP_DIR=libnetbeans.so/
 

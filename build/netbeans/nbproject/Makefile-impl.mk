@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=netbeans
 
 # Active Configuration
-DEFAULTCONF=Debug
+DEFAULTCONF=Debug_X64
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Debug Release 
+ALLCONFS=Debug_X64 Release_X64 Release_X86 
 
 
 # build
