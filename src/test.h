@@ -28,7 +28,7 @@ extern "C"{
 		int16_t w;
 		int32_t x;
 		long y;
-		LONGLONG z;
+		DClonglong z;
 		double e;
 	} TestStruct;
 
@@ -80,11 +80,11 @@ extern "C"{
 		int64_t z;
 	} TestComplexStruct;
 
-	typedef double (*MultiplyCallbackFunction)(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e);
+	typedef double (*MultiplyCallbackFunction)(const int16_t w, const int32_t x,const long y, const DClonglong z, const double e);
 	typedef double (*TestStructCallbackFunction)(const TestStruct* pTestStruct);
 
 
-	UV_EXTERN double testMultiplyFunction(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e);
+	UV_EXTERN double testMultiplyFunction(const int16_t w, const int32_t x,const long y, const DClonglong z, const double e);
 	UV_EXTERN double testStructFunction(const TestStruct* pTestStruct);
 	UV_EXTERN void testCallbackFunction(MultiplyCallbackFunction callbackFunction);
 	UV_EXTERN void testAsyncCallbackFunction(MultiplyCallbackFunction callbackFunction);

@@ -74,6 +74,26 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <cTool>
+          <commandLine>-std=c++0x</commandLine>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>../../deps/dyncall-0.7/include</pElem>
+            <pElem>/usr/include/nodejs/deps/v8/include</pElem>
+            <pElem>/usr/include/nodejs/src</pElem>
+            <pElem>/usr/include/nodejs/deps/uv/include</pElem>
+          </incDir>
+          <commandLine>-std=c++0x</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/../../../linux_x64/bridjs.node</output>
+          <linkerLibItems>
+            <linkerLibFileItem>../../deps/dyncall-0.7/linux_x64/libdyncall_s.a</linkerLibFileItem>
+            <linkerLibFileItem>../../deps/dyncall-0.7/linux_x64/libdyncallback_s.a</linkerLibFileItem>
+            <linkerLibFileItem>../../deps/dyncall-0.7/linux_x64/libdynload_s.a</linkerLibFileItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="../../deps/dyncall-0.7/include/dyncall.h"
             ex="false"
@@ -196,9 +216,17 @@
       <compileType>
         <cTool>
           <developmentMode>5</developmentMode>
+          <commandLine>-std=c++0x</commandLine>
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>../../deps/dyncall-0.7/include</pElem>
+            <pElem>/usr/include/nodejs/deps/v8/include</pElem>
+            <pElem>/usr/include/nodejs/src</pElem>
+            <pElem>/usr/include/nodejs/deps/uv/include</pElem>
+          </incDir>
+          <commandLine>-std=c++0x</commandLine>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -206,6 +234,14 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/../../../linux_x64/bridjs.node</output>
+          <linkerLibItems>
+            <linkerLibFileItem>../../deps/dyncall-0.7/linux_x64/libdyncall_s.a</linkerLibFileItem>
+            <linkerLibFileItem>../../deps/dyncall-0.7/linux_x64/libdyncallback_s.a</linkerLibFileItem>
+            <linkerLibFileItem>../../deps/dyncall-0.7/linux_x64/libdynload_s.a</linkerLibFileItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="../../deps/dyncall-0.7/include/dyncall.h"
             ex="false"

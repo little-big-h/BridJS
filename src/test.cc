@@ -4,85 +4,84 @@
 
 using namespace v8;
 
+void bridjs::Test::asyncTestCallback(uv_work_t *req) {
+    MultiplyCallbackFunction func = (MultiplyCallbackFunction) (req->data);
+    //std::cout<<"Got it"<<std::endl;
+    if (func != NULL) {
+        std::cout << "testAsyncCallbackFunction: " << func(2, 2, 2, 2, 2.5) << std::endl;
+    } else {
+        std::cerr << "Fail to cast data pointer to MultiplyCallbackFunction" << std::endl;
+    }
 
-
-void bridjs::Test::asyncTestCallback(uv_work_t *req){
-	MultiplyCallbackFunction func = static_cast<MultiplyCallbackFunction>(req->data);
-	//std::cout<<"Got it"<<std::endl;
-	if(func !=NULL){
-		std::cout<<"testAsyncCallbackFunction: "<<func(2,2,2,2,2.5)<<std::endl;
-	}else{
-		std::cerr<<"Fail to cast data pointer to MultiplyCallbackFunction"<<std::endl;
-	}
-
-	//std::cout<<"Got it"<<std::endl;
+    //std::cout<<"Got it"<<std::endl;
 }
 
-void bridjs::Test::afterCallAsync(uv_work_t *req){
-	delete req;
-	//std::cout<<"Got it2"<<std::endl;
+void bridjs::Test::afterCallAsync(uv_work_t *req) {
+    delete req;
+    //std::cout<<"Got it2"<<std::endl;
 }
 
-Handle<v8::Value> bridjs::Test::TestMultiplyFunction(const v8::Arguments& args){
-	HandleScope scope;
+Handle<v8::Value> bridjs::Test::TestMultiplyFunction(const v8::Arguments& args) {
+    HandleScope scope;
 
-	GET_INT32_ARG(w,args,0);
-	GET_INT32_ARG(x,args,1);
-	GET_INT64_ARG(y,args,2);
-	GET_INT64_ARG(z,args,3);
-	GET_DOUBLE_ARG(e,args,4);
+    GET_INT32_ARG(w, args, 0);
+    GET_INT32_ARG(x, args, 1);
+    GET_INT64_ARG(y, args, 2);
+    GET_INT64_ARG(z, args, 3);
+    GET_DOUBLE_ARG(e, args, 4);
 
-	return scope.Close(v8::Number::New(testMultiplyFunction(w,x,static_cast<const long>(y),z,e)));
+    return scope.Close(v8::Number::New(testMultiplyFunction(w, x, static_cast<const long> (y), z, e)));
 }
 
-extern "C"{
-	double testMultiplyFunction(const int16_t w, const int32_t x,const long y, const LONGLONG z, const double e){
-		return w*x*y*z*e;
-	}
+extern "C" {
 
-	void testCallbackFunction(MultiplyCallbackFunction callbackFunction){
-		std::cout<<"testCallbackFunction: "<<callbackFunction(2,2,2,2,2.5)<<std::endl;
-	}
+    double testMultiplyFunction(const int16_t w, const int32_t x, const long y, const DClonglong z, const double e) {
+        return w * x * y * z*e;
+    }
 
-	void testAsyncCallbackFunction(MultiplyCallbackFunction callbackFunction){
-		uv_work_t *req = new uv_work_t();
-		req->data = callbackFunction;
+    void testCallbackFunction(MultiplyCallbackFunction callbackFunction) {
+        std::cout << "testCallbackFunction: " << callbackFunction(2, 2, 2, 2, 2.5) << std::endl;
+    }
 
-		uv_queue_work(uv_default_loop(),req,bridjs::Test::asyncTestCallback,(uv_after_work_cb)bridjs::Test::afterCallAsync);
-	}
+    void testAsyncCallbackFunction(MultiplyCallbackFunction callbackFunction) {
+        uv_work_t *req = new uv_work_t();
+        req->data = (void*)callbackFunction;
 
-	double testStructFunction(const TestStruct *pTestStruct){
+        uv_queue_work(uv_default_loop(), req, bridjs::Test::asyncTestCallback, (uv_after_work_cb) bridjs::Test::afterCallAsync);
+    }
 
-		//std::cout<<pTestStruct->e<<std::endl;
+    double testStructFunction(const TestStruct *pTestStruct) {
 
-		return  pTestStruct->w* pTestStruct->x* pTestStruct->y* pTestStruct->z* pTestStruct->e;
-	}
+        //std::cout<<pTestStruct->e<<std::endl;
 
-	double testStructValueFunction(const TestStruct testStruct){
+        return pTestStruct->w * pTestStruct->x * pTestStruct->y * pTestStruct->z * pTestStruct->e;
+    }
 
-		//std::cout<<pTestStruct->e<<std::endl;
+    double testStructValueFunction(const TestStruct testStruct) {
 
-		return  testStruct.w* testStruct.x* testStruct.y* testStruct.z* testStruct.e;
-	}
+        //std::cout<<pTestStruct->e<<std::endl;
 
-	double testComplexStructFunction(const TestComplexStruct* pTestStruct){
-		return  pTestStruct->w*pTestStruct->x*pTestStruct->y*pTestStruct->z*pTestStruct->point2d.x*pTestStruct->point3d.y*pTestStruct->subStruct.e;
-	}
+        return testStruct.w * testStruct.x * testStruct.y * testStruct.z * testStruct.e;
+    }
 
-	double testArrayStructFunction(const TestArrayStruct* pTestStruct){
-		return pTestStruct->w*pTestStruct->first[1]*pTestStruct->second[2];
-	}
+    double testComplexStructFunction(const TestComplexStruct* pTestStruct) {
+        return pTestStruct->w * pTestStruct->x * pTestStruct->y * pTestStruct->z * pTestStruct->point2d.x * pTestStruct->point3d.y * pTestStruct->subStruct.e;
+    }
 
-	const TestStruct* testStructPassByPointerFunction(const TestStruct* pTestStruct){
-		return pTestStruct;
-	}
+    double testArrayStructFunction(const TestArrayStruct* pTestStruct) {
+        return pTestStruct->w * pTestStruct->first[1] * pTestStruct->second[2];
+    }
 
-	void testStructCallbackFunction(const TestStruct* pTestStruct,TestStructCallbackFunction callbackFunction){
-		//std::cout<<(void*)callbackFunction<<std::endl;
-		std::cout<<"testStructCallbackFunction: "<<callbackFunction(pTestStruct)<<std::endl;
-	}
+    const TestStruct* testStructPassByPointerFunction(const TestStruct* pTestStruct) {
+        return pTestStruct;
+    }
 
-	const double* testValuePassByPointerFunction(const double *returnValue){
-		return returnValue;
-	}
+    void testStructCallbackFunction(const TestStruct* pTestStruct, TestStructCallbackFunction callbackFunction) {
+        //std::cout<<(void*)callbackFunction<<std::endl;
+        std::cout << "testStructCallbackFunction: " << callbackFunction(pTestStruct) << std::endl;
+    }
+
+    const double* testValuePassByPointerFunction(const double *returnValue) {
+        return returnValue;
+    }
 }

@@ -5,3 +5,5 @@ dyncall
 .DS_Store
 non_committable_experiments
 node-x86.exe
+/build/netbeans/build/
+/build/netbeans/dist/

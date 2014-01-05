@@ -1,11 +1,12 @@
 #include "dyncall_v8_utils.h"
 #include "pointer_v8.h"
 #include <iostream>
+#include <cstring>
 
 extern "C"
 {
     #include "dyncall.h"    
-	#include "dyncall_signature.h"
+    #include "dyncall_signature.h"
 }
 
 using namespace v8;
