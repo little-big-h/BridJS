@@ -272,6 +272,7 @@
     <ClInclude Include="..\..\deps\dyncall-0.7\include\dyncall_types.h" />
     <ClInclude Include="..\..\deps\dyncall-0.7\include\dyncall_value.h" />
     <ClInclude Include="..\..\deps\dyncall-0.7\include\dynload.h" />
+    <ClInclude Include="..\..\src\array_struct_v8.h" />
     <ClInclude Include="..\..\src\dyncallback_v8.h" />
     <ClInclude Include="..\..\src\dyncall_v8.h" />
     <ClInclude Include="..\..\src\dyncall_v8_utils.h" />

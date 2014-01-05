@@ -78,6 +78,9 @@
     <ClInclude Include="..\..\src\test.h">
       <Filter>..\include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\array_struct_v8.h">
+      <Filter>..\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\bridjs_module.cc">
