@@ -14,8 +14,6 @@ using namespace v8;
 using namespace node;
 
 Persistent<v8::Function> bridjs::ArrayStruct::constructor;
-std::vector<char> gEmptyTypes;
-std::map<uint32_t,v8::Local<v8::Object>> gEmptySubStructMap;
 
 void bridjs::ArrayStruct::Init(v8::Handle<v8::Object> exports) {
     // Prepare constructor template
@@ -46,6 +44,9 @@ void bridjs::ArrayStruct::Init(v8::Handle<v8::Object> exports) {
     constructor = Persistent<Function>::New(tpl->GetFunction());
 
     exports->Set(String::NewSymbol("ArrayStruct"), constructor);
+    
+    bridjs::ArrayStruct::mEmptyTypes = std::vector<char>();
+    bridjs::ArrayStruct::mEmptySubStructMap = std::map<uint32_t,v8::Local<v8::Object>>();
 }
 
 bridjs::ArrayStruct* bridjs::ArrayStruct::New(const char type, const size_t length, const size_t alignment) {
@@ -76,7 +77,7 @@ v8::Handle<v8::Value> bridjs::ArrayStruct::New(const v8::Arguments& args) {
 }
 
 bridjs::ArrayStruct::ArrayStruct(const char type, const size_t length,
-        const size_t alignment) : mType(type), mLength(length), bridjs::Struct(gEmptyTypes, gEmptySubStructMap, 
+        const size_t alignment) : mType(type), mLength(length), bridjs::Struct(mEmptyTypes, mEmptySubStructMap, 
         alignment) {
 
     this->mSize = this->deriveArrayLayout(alignment);
