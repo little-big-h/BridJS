@@ -171,6 +171,28 @@ var returnNativeDouble = nativeModule.testValuePassByPointerFunction(bridjs.byPo
 
 var result = returnNativeDouble.get();
 ```
+###Build binary addon
+1. Windows
+----------
+
+``` bash
+Open build/vc11/binding.sln to build native 
+```
+2. Linux
+--------
+x64 addon
+
+``` bash
+cd build/netbeans
+make -f nbproject/Makefile-Release_X64.mk QMAKE= SUBPROJECTS= .build-conf
+```
+x86 addon
+
+``` bash
+cd build/netbeans
+make -f nbproject/Makefile-Release_X86.mk QMAKE= SUBPROJECTS= .build-conf
+```
+
 ###License
 
 BSD License. See the `LICENSE` file.
