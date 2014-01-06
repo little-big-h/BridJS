@@ -172,13 +172,13 @@ var returnNativeDouble = nativeModule.testValuePassByPointerFunction(bridjs.byPo
 var result = returnNativeDouble.get();
 ```
 ###Build binary addon
-1. Windows
+####1. Windows
 ----------
 
 ``` bash
 Open build/vc11/binding.sln to build native 
 ```
-2. Linux
+####2. Linux
 --------
 x64 addon
 
