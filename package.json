@@ -1,11 +1,12 @@
 {
     "name": "bridjs",
-    "version": "0.1.7-1",
+    "version": "0.1.7-3",
     "description": "V8 bindings for dyncall, and BridJ-like API for nodejs.",
     "keywords": [
         "dyncall",
         "ffi",
-        "native binding"
+        "native binding",
+        "BridJ"
     ],
     "main": "./lib/bridjs",
     "author": {
@@ -45,9 +46,9 @@
     "browser": {
         "os": false
     },
-    "readme": "V8 bindings for dyncall, and BridJ-like API for nodejs.",
+    "readme": "BridJS is a [BridJ](http://bridj.googlecode.com)-like API for runtime binding C function and struct without writing any extra native code.",
     "readmeFilename": "README.md",
     "homepage": "https://github.com/jiahansu/BridJS/",
-    "_id": "bridjs@0.1.7-1",
-    "_from": "bridjs@>=0.1.7-1"
+    "_id": "bridjs@0.1.7-3",
+    "_from": "bridjs@>=0.1.7-3"
 }
