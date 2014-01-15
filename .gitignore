@@ -5,5 +5,7 @@ dyncall
 .DS_Store
 non_committable_experiments
 node-x86.exe
+node-x86
+win32_x64/binding.gyp
 /build/netbeans/build/
 /build/netbeans/dist/

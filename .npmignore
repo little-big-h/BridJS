@@ -1,0 +1,7 @@
+build
+deps
+src
+node_modules
+nodejs-x86
+node-x86
+node-x86.exe
