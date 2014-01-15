@@ -33,6 +33,7 @@
       <itemPath>../../lib/bridjs_exception.js</itemPath>
       <itemPath>../../lib/callback_wrapper.js</itemPath>
       <itemPath>../../lib/function_callback_wrapper.js</itemPath>
+      <itemPath>../../lib/native_lib.js</itemPath>
       <itemPath>../../lib/pass_type_wrapper.js</itemPath>
       <itemPath>../../lib/struct_field.js</itemPath>
       <itemPath>../../lib/utils.js</itemPath>
@@ -174,6 +175,8 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="../../lib/native_lib.js" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../lib/pass_type_wrapper.js" ex="false" tool="3" flavor2="0">
       </item>
@@ -335,6 +338,8 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../lib/native_lib.js" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../lib/pass_type_wrapper.js" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../lib/struct_field.js" ex="false" tool="3" flavor2="0">
@@ -494,6 +499,8 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="../../lib/native_lib.js" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../lib/pass_type_wrapper.js" ex="false" tool="3" flavor2="0">
       </item>
