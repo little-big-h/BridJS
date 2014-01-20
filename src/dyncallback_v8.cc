@@ -593,7 +593,7 @@ NativeFunction(NULL, returnType, argumentTypes), mpCallbackObject(pCallbackObjec
         std::ostringstream message;
 
         message << "bridjs::CallbackWrapper::CallbackWrapper() => Fail to init mMutex, error = " << error;
-        std::cerr << message << std::endl;
+		std::cerr << message.str() << std::endl;
 
         throw std::runtime_error(message.str());
     }
@@ -672,7 +672,7 @@ mpDCCallBack(pDCCallBack), mpDCArgs(pDCArgs), mpDCresult(pDCresult) {
         std::ostringstream message;
 
         message << "CallbackTask::CallbackTask() => Fail to init mMutex, error = " << error;
-        std::cerr << message << std::endl;
+		std::cerr << message.str() << std::endl;
 
         throw std::runtime_error(message.str());
     }
