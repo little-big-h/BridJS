@@ -128,7 +128,6 @@ Handle<Value> Dynload::loadLibrary(const Arguments& args) {
 
     try {
         uv_mutex_lock(&gLoadLubraryMutex);
-        ;
 
         std::map<std::string, DLLib*>::iterator libIterator = gLoadedLibraryMap.find(*libpath);
 

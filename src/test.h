@@ -119,6 +119,7 @@ extern "C" {
 
     UV_EXTERN double testMultiplyFunction(const int16_t w, const int32_t x, const long y, const DClonglong z, const double e);
     UV_EXTERN double testStructFunction(const TestStruct* pTestStruct);
+	UV_EXTERN const char* testStringFunction(const char* pTestStruct);
     UV_EXTERN void testCallbackFunction(MultiplyCallbackFunction callbackFunction);
     UV_EXTERN void testAsyncCallbackFunction(MultiplyCallbackFunction callbackFunction);
     UV_EXTERN double testStructValueFunction(const TestStruct testStruct);

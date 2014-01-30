@@ -105,7 +105,6 @@ ObjectCollection::~ObjectCollection() {
 
 v8::Handle<v8::Value> pushArgs(DCCallVM *vm, const bridjs::NativeFunction *nativeFunction,
         const ValueCollection* args, const uint32_t offset) {
-    HandleScope scope;
     uint32_t i;
     const size_t length = nativeFunction->getArgumentLength();
 
@@ -165,7 +164,14 @@ v8::Handle<v8::Value> pushArgs(DCCallVM *vm, const bridjs::NativeFunction *nativ
                 dcArgDouble(vm, (val));
             }
                 break;
-            case DC_SIGCHAR_STRING:
+			case DC_SIGCHAR_STRING:
+			{
+				GET_STRING_VALUE(val, args->get(i), i);
+				v8::Local<std::string> string = new std::string(*v8::String::Utf8Value(args->get(i)));
+
+				dcArgPointer(vm, (void*)string->c_str());
+			}
+				break;
             case DC_SIGCHAR_POINTER:
             {
                 GET_POINTER_VALUE(void, val, args->get(i), i);
@@ -181,7 +187,7 @@ v8::Handle<v8::Value> pushArgs(DCCallVM *vm, const bridjs::NativeFunction *nativ
         }
     }
 
-    return scope.Close(v8::Null());
+    return v8::Null();
 }
 
 std::shared_ptr<void> callByType(DCCallVM *vm, const bridjs::NativeFunction *nativeFunction) {

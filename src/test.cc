@@ -116,4 +116,8 @@ extern "C" {
     const double* testValuePassByPointerFunction(const double *returnValue) {
         return returnValue;
     }
+
+	const char* testStringFunction(const char* pTestString){
+		return pTestString;
+	}
 }

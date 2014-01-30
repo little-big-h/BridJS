@@ -249,7 +249,7 @@ var lib;
                 testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback, testStruct2, 
                 HugeArrayStruct, structCallback, 
                 DoubleValue = bridjs.NativeValue.double, 
-                doubleValue;
+                doubleValue, testString = "test_string";
 
             //bridjs.register(Tester, libPath);
              TestStruct = bridjs.defineStruct({
@@ -264,6 +264,7 @@ var lib;
                 testMultiply: bridjs.defineFunction(Signature.double, Signature.int16, Signature.int32,
                         Signature.long, Signature.longlong, Signature.double).bind("testMultiplyFunction"),
                 testStructFunction: bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
+                testStringFunction: bridjs.defineFunction(Signature.string, Signature.string),
                 testComplexStructFunction :  bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testAsyncCallbackFunction : bridjs.defineFunction(Signature.VOID_TYPE, Signature.POINTER_TYPE),
@@ -419,6 +420,14 @@ var lib;
             assert(doubleValue.get() === 2.5 ,"Fail to call testerInstance.testValuePassByPointerFunction");
             //bridjs.unregister(Tester);
             log.info("Test prototype binding pass");
+            
+            bridjs.async(testerInstance).testStringFunction(testString, function(result){
+                //log.info(result.e);
+                assert(testString===result ,"Fail to call testerInstance.testStringFunction asynchronously");
+            });
+            /*
+            assert(testString===testerInstance.testStringFunction(testString), 
+            "Fail to call testerInstance.testStringFunction");*/
         }
         //clearInterval(interval);
     };
