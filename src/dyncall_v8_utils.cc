@@ -198,6 +198,7 @@ void bridjs::Utils::Init(v8::Handle<v8::Object> utilsObj){
 	NODE_SET_METHOD(utilsObj,"getTypeSize",GetTypeSize);
 	NODE_SET_METHOD(utilsObj,"writeInt64",WriteInt64);
 	NODE_SET_METHOD(utilsObj,"pointerToString",PointerToString);
+	NODE_SET_METHOD(utilsObj, "memoryCopy", MemCpy);
 }
 
 v8::Handle<v8::Value> bridjs::Utils::PointerToString(const v8::Arguments& args){
@@ -290,6 +291,17 @@ v8::Handle<v8::String> bridjs::Utils::toV8String(const char val){
 	char str[] = {val, '\0'};
 
 	return v8::String::New(str);
+}
+
+v8::Handle<v8::Value> bridjs::Utils::MemCpy(const v8::Arguments& args){
+	HandleScope scope;
+	GET_POINTER_ARG(void, pDst, args, 0);
+	GET_POINTER_ARG(void, pSrc, args, 1);
+	GET_INT64_ARG(size, args, 2);
+
+	memcpy(pDst, pSrc, size);
+
+	return scope.Close(v8::Undefined());
 }
 
 bridjs::ValueWrapper::ValueWrapper(v8::Persistent<v8::Value> value){

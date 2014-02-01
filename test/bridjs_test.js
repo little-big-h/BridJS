@@ -249,7 +249,8 @@ var lib;
                 testComplexStruct, point3d, TestArrayStruct, testArrayStruct, callback, testStruct2, 
                 HugeArrayStruct, structCallback, 
                 DoubleValue = bridjs.NativeValue.double, 
-                doubleValue, testString = "test_string";
+                doubleValue, testString = "test_string", strBuffer1 = new Buffer(256)
+                , strBuffer2 = new Buffer(256), size;
 
             //bridjs.register(Tester, libPath);
              TestStruct = bridjs.defineStruct({
@@ -425,6 +426,14 @@ var lib;
                 //log.info(result.e);
                 assert(testString===result ,"Fail to call testerInstance.testStringFunction asynchronously");
             });
+            try{
+                size = strBuffer1.write("test_string","utf-8");
+            }catch(e){
+                console.log(e.stack);
+            }
+            bridjs.utils.memoryCopy(strBuffer2, strBuffer1, size);
+            console.log(strBuffer2.toString("utf-8",0, size));
+            assert(testString===strBuffer2.toString("utf-8",0, size), "Fail to call bridjs.utils.memcpy");
             /*
             assert(testString===testerInstance.testStringFunction(testString), 
             "Fail to call testerInstance.testStringFunction");*/
