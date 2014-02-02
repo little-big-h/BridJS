@@ -269,7 +269,8 @@ var lib;
                 testComplexStructFunction :  bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testArrayStructFunction : bridjs.defineFunction(Signature.DOUBLE_TYPE, Signature.POINTER_TYPE),
                 testAsyncCallbackFunction : bridjs.defineFunction(Signature.VOID_TYPE, Signature.POINTER_TYPE),
-                testStructPassByPointerFunction:bridjs.defineFunction(bridjs.byPointer(TestStruct), Signature.POINTER_TYPE),
+                testStructPassByPointerFunction:bridjs.defineFunction(bridjs.byPointer(TestStruct), Signature.POINTER_TYPE).cacheInstance(false),
+                testStructPassByPointerFunctionWithCacheInstance:bridjs.defineFunction(bridjs.byPointer(TestStruct), Signature.POINTER_TYPE).bind("testStructPassByPointerFunction").cacheInstance(true),
                 testStructCallbackFunction:bridjs.defineFunction(Signature.VOID_TYPE,bridjs.byPointer(TestStruct), Signature.POINTER_TYPE),
                 testValuePassByPointerFunction:bridjs.defineFunction(bridjs.byPointer(DoubleValue),bridjs.byPointer(DoubleValue))
             }, libPath);
@@ -398,6 +399,16 @@ var lib;
 
             assert(testStruct2.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointerFunction");
             
+            ret = testerInstance.testStructPassByPointerFunction(bridjs.getStructPointer(testStruct));
+            
+            assert(testStruct2 !== ret ,"Fail to disable cacheInstance");
+            
+            ret = testerInstance.testStructPassByPointerFunctionWithCacheInstance(bridjs.getStructPointer(testStruct));
+            testStruct2 = ret;
+            ret = testerInstance.testStructPassByPointerFunctionWithCacheInstance(bridjs.getStructPointer(testStruct));
+            
+            assert(testStruct2 === ret ,"Fail to enable cacheInstance");
+            
             bridjs.async(testerInstance).testStructPassByPointerFunction(bridjs.getStructPointer(testStruct), function(result){
                 //log.info(result.e);
                 assert(result.e === testStruct.e ,"Fail to call testerInstance.testStructPassByPointerFunction asynchronously");
@@ -432,7 +443,7 @@ var lib;
                 console.log(e.stack);
             }
             bridjs.utils.memoryCopy(strBuffer2, strBuffer1, size);
-            console.log(strBuffer2.toString("utf-8",0, size));
+            //console.log(strBuffer2.toString("utf-8",0, size));
             assert(testString===strBuffer2.toString("utf-8",0, size), "Fail to call bridjs.utils.memcpy");
             /*
             assert(testString===testerInstance.testStringFunction(testString), 
