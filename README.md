@@ -17,7 +17,7 @@ Like [BridJ](http://bridj.googlecode.com), BridJS also has some limitations:
 
 ###Requirement
 * [nodejs](http://nodejs.org/) v0.10.8 or higher
-* Windows with [Visual C++ Redistributable for Visual Studio 2012](http://www.microsoft.com/en-us/download/details.aspx?id=30679) or Linux
+* Windows with [Visual C++ Redistributable for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=40784) or Linux
 
 ###Installation
 ``` bash
