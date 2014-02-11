@@ -234,6 +234,13 @@ void init(Handle<Object> target) {
     signatureObj->Set(String::NewSymbol("UINT64_TYPE"),
             bridjs::Utils::toV8String(unsignedType), ReadOnly);
 
+	/*size_t*/
+	getSignedAndUnsinedTypeFromTypeSize(sizeof (size_t), signedType, unsignedType);
+	signatureObj->Set(String::NewSymbol("SIZE_TYPE"),
+		bridjs::Utils::toV8String(signedType), ReadOnly);
+	signatureObj->Set(String::NewSymbol("SIZE_TYPE"),
+		bridjs::Utils::toV8String(unsignedType), ReadOnly);
+
     EXPORT_FUNCTION(dyncallObj, bridjs::Dyncall, newCallVM);
     EXPORT_FUNCTION(dyncallObj, bridjs::Dyncall, free);
     EXPORT_FUNCTION(dyncallObj, bridjs::Dyncall, reset);
