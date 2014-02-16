@@ -167,9 +167,14 @@ v8::Handle<v8::Value> pushArgs(DCCallVM *vm, const bridjs::NativeFunction *nativ
 			case DC_SIGCHAR_STRING:
 			{
 				GET_STRING_VALUE(val, args->get(i), i);
-				v8::Local<std::string> string = new std::string(*v8::String::Utf8Value(args->get(i)));
+				if (val->IsNull()){
+					dcArgPointer(vm, NULL);
+				}else{
+					v8::Local<std::string> string = new std::string(*v8::String::Utf8Value(args->get(i)));
 
-				dcArgPointer(vm, (void*)string->c_str());
+					dcArgPointer(vm, (void*)string->c_str());
+				}
+				
 			}
 				break;
             case DC_SIGCHAR_POINTER:

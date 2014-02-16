@@ -191,7 +191,7 @@
 
 #define GET_STRING_VALUE(name, value, index) \
   Local<Value> name = value; \
-  if (!name->IsString()) { \
+  if (!name->IsString()&&!name->IsNull()) { \
     std::stringstream message; \
 	v8::String::Utf8Value valueStr(value); \
 	message<< "Invalid value for string argument " #name " at index ="<<index<<", value = "<<(*valueStr); \
@@ -235,7 +235,9 @@
 #define GET_POINTER_VALUE(type, name, value, index) \
   Local<Value> name ## Value = value; \
   type* name; \
-  if(name ## Value->IsString()){ \
+  if (name ## Value->IsNumber()) {\
+	name = (type*)name ## Value->IntegerValue(); \
+  }else if(name ## Value->IsString()){ \
 	  v8::String::Utf8Value str(name ## Value); \
 	  name = (type*)(*name ## Value); \
   }else if (name ## Value->IsObject() || name ## Value->IsNull()) { \
