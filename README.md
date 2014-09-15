@@ -73,7 +73,7 @@ double testComplexStructFunction(const ComplexStruct* pTestStruct)
 ``` 	
 You can define JavaScript prototype like this:
 ``` bash
-var Point3d = defineStruct({
+var Point3d = bridjs.defineStruct({
     x : bridjs.structField(Sig.double,0),
     y : bridjs.structField(Sig.double,1),
     z : bridjs.structField(Sig.double,2)
