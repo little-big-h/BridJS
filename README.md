@@ -1,3 +1,13 @@
+DISCLAIMER
+==========
+
+This is a very hacky clone of the original BridJS. I needed it to work
+on OSX and did the minimum amount of work necessary: create a
+bridjs.node library with debug symbols by hand and put it in the
+directory - not very clean.
+
+
+
 BridJS
 ======
 BridJS is a [BridJ](http://bridj.googlecode.com)-like API for runtime binding C function and struct without writing any extra native code.
